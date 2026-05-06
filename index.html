@@ -222,13 +222,51 @@ input[type=range]{width:100%;accent-color:var(--purple);cursor:pointer;}
 .notif.success{border-color:rgba(22,163,74,.3);color:#16a34a;}
 .notif.error{border-color:rgba(220,38,38,.3);color:#dc2626;}
 
+/* HAMBURGER */
+.hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;background:#2563eb;border-radius:10px;border:none;cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:5px;box-shadow:0 2px 10px rgba(37,99,235,0.3);}
+.hamburger span{display:block;width:18px;height:2px;background:#fff;border-radius:2px;transition:.3s;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:99;backdrop-filter:blur(2px);}
+.overlay.show{display:block;}
+
+/* MOBILE TOP BAR */
+.mobile-topbar{display:none;position:fixed;top:0;left:0;right:0;height:56px;background:#fff;border-bottom:1px solid rgba(37,99,235,0.12);z-index:150;align-items:center;padding:0 16px 0 60px;box-shadow:0 2px 8px rgba(30,80,180,0.06);}
+.mobile-topbar-title{font-size:15px;font-weight:700;color:#1a2a4a;}
+
 @media(max-width:768px){
-  .sidebar{transform:translateX(-100%);transition:.3s;}
+  .hamburger{display:flex;}
+  .mobile-topbar{display:flex;}
+  .sidebar{transform:translateX(-100%);transition:.3s;z-index:100;}
   .sidebar.open{transform:translateX(0);}
-  .main{margin-left:0;}
-  .page{padding:16px;}
+  .main{margin-left:0;padding-top:56px;}
+  .page{padding:14px 12px;}
   .grid2,.grid3,.grid4{grid-template-columns:1fr;}
   .dash-tools{grid-template-columns:1fr;}
+  .page-header h1{font-size:18px;}
+  .lot-tabs{overflow-x:auto;padding-bottom:4px;flex-wrap:nowrap;}
+  .lot-tab{white-space:nowrap;flex-shrink:0;}
+  .card{padding:14px;}
+  .stat-card{padding:14px;}
+  .stat-val{font-size:22px;}
+  .balls{gap:4px;}
+  .ball{width:30px;height:30px;font-size:11px;}
+  .ball-sm{width:26px;height:26px;font-size:10px;}
+  .game-row{padding:10px 12px;}
+  .game-row-header{flex-wrap:wrap;gap:6px;}
+  .btn-sm{padding:5px 10px;font-size:11px;}
+  .data-table{font-size:12px;}
+  .data-table th,.data-table td{padding:8px 6px;}
+  .notif{top:auto;bottom:20px;right:12px;left:12px;max-width:none;}
+  .combo-tabs{overflow-x:auto;flex-wrap:nowrap;}
+  .combo-tab{white-space:nowrap;flex-shrink:0;}
+  #filtro-data,#filtro-lot{font-size:11px;padding:5px 8px;}
+  .heatmap{grid-template-columns:repeat(5,1fr) !important;}
+  .bar-chart{height:60px;}
+  .plan-cards{grid-template-columns:1fr;}
+  .grid2 .card:first-child{margin-bottom:0;}
+  /* Gerador mobile: stack config above games */
+  #page-gerador .grid2{gap:14px;}
+  /* Results nav */
+  #page-resultados > div:nth-child(3){flex-wrap:wrap;}
 }
 </style>
 </head>
@@ -250,22 +288,31 @@ input[type=range]{width:100%;accent-color:var(--purple);cursor:pointer;}
   </div>
   <div class="auth-error" id="auth-error"></div>
   <div id="login-form">
-    <div class="form-group"><label>E-mail ou usuário</label><input type="text" id="l-user" placeholder="seu@email.com"></div>
-    <div class="form-group"><label>Senha</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+    <div class="form-group"><label>E-mail ou usuário</label><input type="text" id="l-user" placeholder="seu@email.com" autocomplete="username" autocapitalize="none"></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="btn-primary" onclick="doLogin()">→ Entrar</button>
     <div class="auth-extra" style="margin-top:16px;">Não tem conta? <a onclick="switchAuthTab('register')">Cadastre-se</a></div>
     <div class="auth-secure">🔒 Seus dados estão protegidos</div>
   </div>
   <div id="register-form" style="display:none">
-    <div class="form-group"><label>Nome completo</label><input type="text" id="r-name" placeholder="Ex: João Silva"></div>
-    <div class="form-group"><label>Usuário</label><input type="text" id="r-user" placeholder="Ex: joao123"></div>
-    <div class="form-group"><label>Senha</label><input type="password" id="r-pass" placeholder="Mínimo 4 caracteres"></div>
+    <div class="form-group"><label>Nome completo</label><input type="text" id="r-name" placeholder="Ex: João Silva" autocomplete="name"></div>
+    <div class="form-group"><label>Usuário</label><input type="text" id="r-user" placeholder="Ex: joao123" autocomplete="username" autocapitalize="none"></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="r-pass" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
     <button class="btn-primary" onclick="doRegister()">Criar conta</button>
     <div class="auth-extra" style="margin-top:16px;">Já tem conta? <a onclick="switchAuthTab('login')">Entrar</a></div>
     <div class="auth-secure">🔒 Seus dados estão protegidos</div>
   </div>
 </div>
 </div>
+
+<!-- MOBILE UI -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</button>
+<div class="mobile-topbar">
+  <div class="mobile-topbar-title" id="mobile-page-title">Área da Sorte</div>
+</div>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
 <!-- APP -->
 <div id="app">
@@ -584,14 +631,58 @@ input[type=range]{width:100%;accent-color:var(--purple);cursor:pointer;}
 
 <script>
 // ============ STORAGE / AUTH ============
+// Robust storage: localStorage with in-memory fallback
+const _memStore={};
+const Store={
+  set(k,v){
+    const s=JSON.stringify(v);
+    _memStore[k]=s;
+    try{localStorage.setItem(k,s);}catch(e){}
+  },
+  get(k,def=null){
+    // Try memory first (always fresh), then localStorage
+    if(_memStore[k]!==undefined){try{return JSON.parse(_memStore[k]);}catch(e){return def;}}
+    try{
+      const v=localStorage.getItem(k);
+      if(v===null)return def;
+      const parsed=JSON.parse(v);
+      _memStore[k]=v; // cache in memory
+      return parsed;
+    }catch(e){return def;}
+  },
+  remove(k){
+    delete _memStore[k];
+    try{localStorage.removeItem(k);}catch(e){}
+  },
+  // Test if localStorage actually works
+  test(){
+    try{localStorage.setItem('__test__','1');localStorage.removeItem('__test__');return true;}
+    catch(e){return false;}
+  }
+};
+
+// Warn user if localStorage is blocked (iOS private mode)
+let _storageOk=false;
+window.addEventListener('load',()=>{
+  _storageOk=Store.test();
+  if(!_storageOk){
+    setTimeout(()=>{
+      const w=document.createElement('div');
+      w.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#b45309;color:#fff;padding:12px 16px;font-size:13px;z-index:9999;text-align:center;';
+      w.innerHTML='⚠️ Modo privado detectado. Seus dados não serão salvos ao fechar o app. <button onclick="this.parentNode.remove()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:3px 10px;border-radius:6px;margin-left:8px;cursor:pointer;">OK</button>';
+      document.body.appendChild(w);
+    },2000);
+  }
+});
+
 const DB = {
-  getUsers(){ return JSON.parse(localStorage.getItem('lf_users')||'{}'); },
-  setUsers(u){ localStorage.setItem('lf_users',JSON.stringify(u)); },
-  getCurrent(){ return localStorage.getItem('lf_current')||null; },
-  setCurrent(u){ localStorage.setItem('lf_current',u); },
-  clearCurrent(){ localStorage.removeItem('lf_current'); },
-  getUserData(user){ return JSON.parse(localStorage.getItem('lf_data_'+user)||'{"jogos":[]}'); },
-  setUserData(user,data){ localStorage.setItem('lf_data_'+user,JSON.stringify(data)); }
+  getUsers(){ return Store.get('as_users',{}); },
+  setUsers(u){ Store.set('as_users',u); },
+  getCurrent(){ return Store.get('as_current',null); },
+  setCurrent(u){ Store.set('as_current',u); },
+  clearCurrent(){ Store.remove('as_current'); },
+  getUserData(user){ return Store.get('as_data_'+user,{jogos:[]}); },
+  setUserData(user,data){ Store.set('as_data_'+user,data); }
 };
 
 let currentUser=null, currentLot={desdobramentos:'lotofacil',gerador:'lotofacil',inteligencia:'lotofacil',combinacoes:'lotofacil',resultados:'lotofacil'};
@@ -622,6 +713,8 @@ function doRegister(){
 }
 function doLogout(){
   DB.clearCurrent(); currentUser=null;
+  const sb=document.getElementById('sidebar');
+  if(sb.classList.contains('open')) toggleSidebar();
   document.getElementById('app').style.display='none';
   document.getElementById('auth-screen').style.display='flex';
 }
@@ -641,14 +734,43 @@ function enterApp(){
 window.addEventListener('load',()=>{
   const u=DB.getCurrent();
   if(u&&DB.getUsers()[u]){currentUser=u;enterApp();}
+  // Enter key on login
+  document.getElementById('l-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('l-user').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('r-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doRegister();});
 });
 
 // ============ NAVIGATION ============
+const pageNames={dashboard:'Início',desdobramentos:'Desdobramentos',gerador:'Gerador',inteligencia:'Inteligência',combinacoes:'Combinações',resultados:'Resultados'};
+
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('overlay');
+  const hb=document.getElementById('hamburger');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+  // Animate hamburger
+  const spans=hb.querySelectorAll('span');
+  if(sb.classList.contains('open')){
+    spans[0].style.transform='rotate(45deg) translate(5px,5px)';
+    spans[1].style.opacity='0';
+    spans[2].style.transform='rotate(-45deg) translate(5px,-5px)';
+  } else {
+    spans[0].style.transform=''; spans[1].style.opacity=''; spans[2].style.transform='';
+  }
+}
+
 function navTo(page){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelector(`.nav-item[onclick="navTo('${page}')"]`).classList.add('active');
   document.getElementById('page-'+page).classList.add('active');
+  // Update mobile topbar title
+  const titleEl=document.getElementById('mobile-page-title');
+  if(titleEl) titleEl.textContent=pageNames[page]||'Área da Sorte';
+  // Close sidebar on mobile
+  const sb=document.getElementById('sidebar');
+  if(sb.classList.contains('open')) toggleSidebar();
   if(page==='inteligencia') loadInteligencia();
   if(page==='combinacoes') loadCombinacoes();
   if(page==='resultados') loadUltimoResultado();
