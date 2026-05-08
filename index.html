@@ -233,6 +233,14 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
 .combo-tabs{display:flex;gap:5px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .combo-tab{padding:6px 13px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(37,99,235,0.15);color:var(--text2);background:#fff;white-space:nowrap;flex-shrink:0;}
 .combo-tab.active{background:rgba(37,99,235,0.10);color:#1a56c4;border-color:rgba(37,99,235,0.25);}
+/* PIX / PLAN */
+.plan-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.plan-opt{border:2px solid var(--border2);border-radius:14px;padding:18px 14px;cursor:pointer;transition:.2s;background:#fff;text-align:center;}
+.plan-opt:active{transform:scale(.97);}
+.plan-opt.selected{border-color:#2563eb;background:rgba(37,99,235,0.06);box-shadow:0 0 0 3px rgba(37,99,235,0.10);}
+.plan-opt .po-name{font-size:14px;font-weight:700;color:#1a2a4a;}
+.plan-opt .po-price{font-size:26px;font-weight:800;color:#2563eb;margin:6px 0;}
+.plan-opt .po-sub{font-size:11px;color:#8aa0bc;}
 
 /* MOBILE RESPONSIVE */
 @media(max-width:768px){
@@ -290,7 +298,7 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
   <div class="auth-error" id="auth-error"></div>
   <div class="auth-info" id="auth-info"></div>
   <div id="login-form">
-    <div class="form-group"><label>Usuário</label><input type="text" id="l-user" placeholder="seu usuário" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+    <div class="form-group"><label>E-mail ou usuário</label><input type="text" id="l-user" placeholder="email ou usuário" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
     <div class="form-group"><label>Senha</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="btn-primary" onclick="doLogin()">→ Entrar</button>
     <div class="auth-extra" style="margin-top:16px;">Não tem conta? <a onclick="switchAuth('register')">Cadastre-se</a></div>
@@ -298,7 +306,7 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
   </div>
   <div id="register-form" style="display:none">
     <div class="form-group"><label>Nome completo</label><input type="text" id="r-name" placeholder="Ex: João Silva" autocomplete="name"></div>
-    <div class="form-group"><label>Usuário</label><input type="text" id="r-user" placeholder="Ex: joao123" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+    <div class="form-group"><label>E-mail</label><input type="email" id="r-email" placeholder="seu@email.com" autocomplete="email" autocapitalize="none" autocorrect="off"></div>
     <div class="form-group"><label>Senha</label><input type="password" id="r-pass" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
     <button class="btn-primary" onclick="doRegister()">Criar conta</button>
     <div class="auth-extra" style="margin-top:16px;">Já tem conta? <a onclick="switchAuth('login')">Entrar</a></div>
@@ -384,6 +392,9 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
   </div>
   <div class="nav-item" onclick="navTo('resultados')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Resultados
+  </div>
+  <div class="nav-item" id="nav-meuplano" onclick="navTo('meuplano')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Meu Plano
   </div>
   <div class="nav-item" id="nav-admin" style="display:none;" onclick="navTo('admin')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin
@@ -554,6 +565,12 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
   <div id="resultado-content" style="display:none;"></div>
 </div>
 
+<!-- MEU PLANO -->
+<div class="page" id="page-meuplano">
+  <div class="page-header"><h1>💳 Meu Plano</h1><p>Gerencie sua assinatura</p></div>
+  <div id="meuplano-content"></div>
+</div>
+
 <!-- ADMIN -->
 <div class="page" id="page-admin">
   <div class="page-header"><h1>👑 Painel Admin</h1><p>Gerencie usuários e acessos</p></div>
@@ -567,7 +584,7 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
     <div class="card">
       <div class="card-title">➕ Criar Usuário</div>
       <div class="form-group"><label>Nome completo</label><input type="text" class="form-ctrl" id="adm-name" placeholder="Nome do usuário"></div>
-      <div class="form-group"><label>Usuário</label><input type="text" class="form-ctrl" id="adm-user" placeholder="login" autocapitalize="none"></div>
+      <div class="form-group"><label>E-mail ou usuário de login</label><input type="text" class="form-ctrl" id="adm-user" placeholder="email@exemplo.com ou joao123" autocapitalize="none" autocorrect="off"></div>
       <div class="form-group"><label>Senha</label><input type="password" class="form-ctrl" id="adm-pass" placeholder="Mínimo 4 caracteres"></div>
       <div class="form-group"><label>Plano</label>
         <select class="form-ctrl" id="adm-plan">
@@ -605,26 +622,30 @@ const Store={
 };
 
 // =============================================
-// USER DB — localStorage central
+// USER DB
 // =============================================
 const UsersDB={
-  getAll(){return Store.get('as_users',this._default());},
+  getAll(){
+    const d=Store.get('as_users',null);
+    if(!d){const def=this._default();Store.set('as_users',def);return def;}
+    // ensure admin always exists
+    if(!d.users)d.users={};
+    if(!d.users['tisouza']){d.users['tisouza']={name:'Tiago Souza',pass:btoa('souz@11'),role:'admin',plan:'admin',email:'tisouza@icloud.com',createdAt:new Date().toISOString(),expiresAt:null,active:true,jogos:[]};Store.set('as_users',d);}
+    return d;
+  },
   saveAll(d){Store.set('as_users',d);},
   _default(){
-    return{users:{tisouza:{name:'Tiago Souza',pass:btoa('souz@11'),role:'admin',plan:'admin',createdAt:new Date().toISOString(),expiresAt:null,active:true,jogos:[]}}};
+    return{users:{tisouza:{name:'Tiago Souza',pass:btoa('souz@11'),role:'admin',plan:'admin',email:'tisouza@icloud.com',createdAt:new Date().toISOString(),expiresAt:null,active:true,jogos:[]}},notifications:[]};
   },
   getUsers(){return this.getAll().users||{};},
   saveUsers(u){const d=this.getAll();d.users=u;this.saveAll(d);},
   getUser(u){return this.getUsers()[u]||null;},
   setUser(u,data){const users=this.getUsers();users[u]=data;this.saveUsers(users);},
-  // Ensure admin always exists
-  ensureAdmin(){
-    const users=this.getUsers();
-    if(!users['tisouza']){
-      users['tisouza']={name:'Tiago Souza',pass:btoa('souz@11'),role:'admin',plan:'admin',createdAt:new Date().toISOString(),expiresAt:null,active:true,jogos:[]};
-      this.saveUsers(users);
-    }
-  }
+  getNotifications(){return this.getAll().notifications||[];},
+  addNotification(notif){const d=this.getAll();if(!d.notifications)d.notifications=[];d.notifications.unshift({...notif,id:Date.now(),read:false,time:new Date().toISOString()});if(d.notifications.length>50)d.notifications=d.notifications.slice(0,50);this.saveAll(d);},
+  markNotifRead(id){const d=this.getAll();if(d.notifications)d.notifications=d.notifications.map(n=>n.id===id?{...n,read:true}:n);this.saveAll(d);},
+  clearNotifications(){const d=this.getAll();d.notifications=[];this.saveAll(d);},
+  ensureAdmin(){this.getAll();}
 };
 
 // =============================================
@@ -658,31 +679,46 @@ function switchAuth(tab){
 function showAuthError(msg){const e=document.getElementById('auth-error');e.textContent=msg;e.style.display='block';}
 
 function doLogin(){
-  const u=document.getElementById('l-user').value.trim().toLowerCase();
+  const input=document.getElementById('l-user').value.trim().toLowerCase();
   const p=document.getElementById('l-pass').value;
-  if(!u||!p){showAuthError('Preencha todos os campos.');return;}
+  if(!input||!p){showAuthError('Preencha todos os campos.');return;}
   UsersDB.ensureAdmin();
   const users=UsersDB.getUsers();
-  if(!users[u]){showAuthError('Usuário não encontrado.');return;}
-  const ud=users[u];
+  // Find by username key, email, or loginId
+  let foundKey=null;
+  if(users[input]){foundKey=input;}
+  else{
+    for(const[k,v] of Object.entries(users)){
+      if(v.email&&v.email.toLowerCase()===input){foundKey=k;break;}
+      if(v.loginId&&v.loginId.toLowerCase()===input){foundKey=k;break;}
+    }
+  }
+  if(!foundKey){showAuthError('Usuário ou e-mail não encontrado.');return;}
+  const ud=users[foundKey];
   if(ud.pass!==btoa(p)){showAuthError('Senha incorreta.');return;}
-  currentUser=u;currentUserData=ud;
-  Store.set('as_current',u);
+  currentUser=foundKey;currentUserData=ud;
+  Store.set('as_current',foundKey);
   checkAccessAndEnter(ud);
 }
 
 function doRegister(){
   const name=document.getElementById('r-name').value.trim();
-  const u=document.getElementById('r-user').value.trim().toLowerCase();
+  const email=document.getElementById('r-email').value.trim().toLowerCase();
   const p=document.getElementById('r-pass').value;
-  if(!name||!u||!p){showAuthError('Preencha todos os campos.');return;}
+  if(!name||!email||!p){showAuthError('Preencha todos os campos.');return;}
   if(p.length<4){showAuthError('Senha mínima de 4 caracteres.');return;}
-  if(!/^[a-z0-9_]+$/.test(u)){showAuthError('Usuário: apenas letras minúsculas, números e _');return;}
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){showAuthError('Digite um e-mail válido.');return;}
   const users=UsersDB.getUsers();
-  if(users[u]){showAuthError('Usuário já existe. Escolha outro.');return;}
+  // Check if email already used
+  const emailUsed=Object.values(users).some(u=>u.email&&u.email.toLowerCase()===email);
+  if(emailUsed){showAuthError('Este e-mail já está cadastrado.');return;}
+  // Use email prefix + random as username key
+  const u=email.replace(/[^a-z0-9]/g,'_').substring(0,20)+'_'+Date.now().toString().slice(-4);
   const trialEnd=new Date();trialEnd.setDate(trialEnd.getDate()+3);
-  const newUser={name,pass:btoa(p),role:'user',plan:'trial',createdAt:new Date().toISOString(),expiresAt:trialEnd.toISOString(),active:true,jogos:[]};
+  const newUser={name,email,pass:btoa(p),role:'user',plan:'trial',createdAt:new Date().toISOString(),expiresAt:trialEnd.toISOString(),active:true,jogos:[],pendingPlan:null};
   users[u]=newUser;UsersDB.saveUsers(users);
+  // Notify admin
+  UsersDB.addNotification({type:'new_user',title:'Novo cadastro!',msg:`${name} (${email}) criou uma conta. Trial de 3 dias ativo.`,user:u});
   currentUser=u;currentUserData=newUser;
   Store.set('as_current',u);
   checkAccessAndEnter(newUser);
@@ -690,9 +726,14 @@ function doRegister(){
 
 function checkAccessAndEnter(ud){
   if(ud.role==='admin'||ud.plan==='admin'||ud.plan==='livre'){enterApp(ud);return;}
-  if(!ud.active){showSuspended(ud);return;}
-  if(ud.expiresAt){const exp=new Date(ud.expiresAt);if(new Date()>exp){showSuspended(ud);return;}}
+  if(!ud.active){showPaywall(ud);return;}
+  if(ud.expiresAt){const exp=new Date(ud.expiresAt);if(new Date()>exp){showPaywall(ud);return;}}
   enterApp(ud);
+}
+function showPaywall(ud){
+  // Enter app but redirect to Meu Plano only
+  enterApp(ud,true);
+  setTimeout(()=>navTo('meuplano'),100);
 }
 
 function showSuspended(ud){
@@ -713,7 +754,7 @@ function copyPix(){
   navigator.clipboard.writeText('tisouza@icloud.com').then(()=>showNotif('Chave PIX copiada! ✅')).catch(()=>{showNotif('Chave: tisouza@icloud.com','error');});
 }
 
-function enterApp(ud){
+function enterApp(ud,paywallMode=false){
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('suspended-screen').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -732,7 +773,12 @@ function enterApp(ud){
     }else{expEl.textContent='Vence: '+exp.toLocaleDateString('pt-BR');expEl.className='u-expiry';}
   }else expEl.textContent='';
   if(ud.role==='admin'||ud.plan==='admin')document.getElementById('nav-admin').style.display='flex';
-  setupDesdobramentoConfig();updateDezJogoOptions();loadDashboard();loadJogosSalvos();
+  setupDesdobramentoConfig();updateDezJogoOptions();
+  if(!paywallMode)loadDashboard();
+  loadJogosSalvos();
+  // Hide nav items in paywall mode
+  const navItems=document.querySelectorAll('.nav-item:not(#nav-meuplano)');
+  navItems.forEach(n=>{if(paywallMode&&n.id!=='nav-admin')n.style.opacity='0.3';else n.style.opacity='';});
 }
 
 function doLogout(){
@@ -756,7 +802,7 @@ window.addEventListener('load',()=>{
 // =============================================
 // NAVIGATION
 // =============================================
-const pageNames={dashboard:'Início',desdobramentos:'Desdobramentos',gerador:'Gerador',inteligencia:'Inteligência',combinacoes:'Combinações',resultados:'Resultados',admin:'Admin'};
+const pageNames={dashboard:'Início',desdobramentos:'Desdobramentos',gerador:'Gerador',inteligencia:'Inteligência',combinacoes:'Combinações',resultados:'Resultados',meuplano:'Meu Plano',admin:'Admin'};
 function toggleSidebar(){
   const sb=document.getElementById('sidebar'),ov=document.getElementById('overlay');
   sb.classList.toggle('open');ov.classList.toggle('show');
@@ -777,6 +823,7 @@ function navTo(page){
   if(page==='resultados')loadUltimoResultado();
   if(page==='gerador')loadJogosSalvos();
   if(page==='admin')loadAdminPanel();
+  if(page==='meuplano')loadMeuPlano();
 }
 function setLotTab(el,section){
   el.closest('.lot-tabs').querySelectorAll('.lot-tab').forEach(t=>t.classList.remove('active'));
@@ -1111,26 +1158,33 @@ function renderAdminUsers(){
   }).join(''):'<div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum usuário encontrado</p></div>';
 }
 function adminCriarUsuario(){
-  const name=document.getElementById('adm-name').value.trim(),u=document.getElementById('adm-user').value.trim().toLowerCase(),p=document.getElementById('adm-pass').value,plan=document.getElementById('adm-plan').value;
-  if(!name||!u||!p){showNotif('Preencha todos os campos.','error');return;}
+  const name=document.getElementById('adm-name').value.trim();
+  const emailOrUser=document.getElementById('adm-user').value.trim().toLowerCase();
+  const p=document.getElementById('adm-pass').value;
+  const plan=document.getElementById('adm-plan').value;
+  if(!name||!emailOrUser||!p){showNotif('Preencha todos os campos.','error');return;}
   if(p.length<4){showNotif('Senha mínima 4 caracteres.','error');return;}
-  const users=UsersDB.getUsers();if(users[u]){showNotif('Usuário já existe.','error');return;}
+  const users=UsersDB.getUsers();
+  // Use email or username as key
+  const isEmail=/^[^@]+@[^@]+\.[^@]+$/.test(emailOrUser);
+  let userKey=isEmail?emailOrUser.replace(/[^a-z0-9]/g,'_').substring(0,20)+'_adm':emailOrUser;
+  // Ensure unique key
+  while(users[userKey])userKey=userKey+'_'+Math.floor(Math.random()*100);
   let expiresAt=null;
   if(plan==='mensal'){const d=new Date();d.setDate(d.getDate()+30);expiresAt=d.toISOString();}
   else if(plan==='anual'){const d=new Date();d.setFullYear(d.getFullYear()+1);expiresAt=d.toISOString();}
-  users[u]={name,pass:btoa(p),role:plan==='admin'?'admin':'user',plan,createdAt:new Date().toISOString(),expiresAt,active:true,jogos:[]};
+  users[userKey]={name,pass:btoa(p),role:plan==='admin'?'admin':'user',plan,email:isEmail?emailOrUser:'',loginId:emailOrUser,createdAt:new Date().toISOString(),expiresAt,active:true,jogos:[],pendingPlan:null};
   UsersDB.saveUsers(users);
-  document.getElementById('adm-name').value='';document.getElementById('adm-user').value='';document.getElementById('adm-pass').value='';
-  showNotif(`Usuário @${u} criado com sucesso! ✅`);loadAdminPanel();
+  document.getElementById('adm-name').value='';
+  document.getElementById('adm-user').value='';
+  document.getElementById('adm-pass').value='';
+  showNotif(`Usuário "${name}" criado! Login: ${emailOrUser} ✅`);
+  loadAdminPanel();
 }
 function adminReativar(u){
   const users=UsersDB.getUsers();if(!users[u])return;
-  const plan=users[u].plan;users[u].active=true;
-  const d=new Date();
-  if(plan==='mensal')d.setDate(d.getDate()+30);
-  else if(plan==='anual')d.setFullYear(d.getFullYear()+1);
-  if(plan!=='admin'&&plan!=='livre')users[u].expiresAt=d.toISOString();
-  UsersDB.saveUsers(users);showNotif(`@${u} reativado! ✅`);loadAdminPanel();
+  adminReativarComPlano(u,users[u].plan||'mensal');
+  showNotif(`@${u} reativado! ✅`);loadAdminPanel();
 }
 function adminSuspender(u){
   if(u===currentUser){showNotif('Você não pode suspender sua própria conta.','error');return;}
@@ -1139,13 +1193,9 @@ function adminSuspender(u){
   users[u].active=false;UsersDB.saveUsers(users);showNotif(`@${u} suspenso.`,'error');loadAdminPanel();
 }
 function adminMudarPlano(u,plan){
-  const users=UsersDB.getUsers();if(!users[u])return;
-  users[u].plan=plan;let expiresAt=null;
-  const d=new Date();
-  if(plan==='mensal'){d.setDate(d.getDate()+30);expiresAt=d.toISOString();}
-  else if(plan==='anual'){d.setFullYear(d.getFullYear()+1);expiresAt=d.toISOString();}
-  users[u].expiresAt=expiresAt;users[u].active=true;
-  UsersDB.saveUsers(users);showNotif(`Plano de @${u} atualizado! ✅`);loadAdminPanel();
+  adminReativarComPlano(u,plan);
+  showNotif(`Plano atualizado! ✅`);
+  setTimeout(()=>loadAdminPanel(),300);
 }
 function adminDeletar(u){
   if(u===currentUser){showNotif('Você não pode deletar sua própria conta.','error');return;}
@@ -1154,6 +1204,278 @@ function adminDeletar(u){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{setupDesdobramentoConfig();updateDezJogoOptions();});
+
+// =============================================
+// MEU PLANO + PIX QR CODE
+// =============================================
+function loadMeuPlano(){
+  const ud=currentUserData||UsersDB.getUser(currentUser);
+  if(!ud){return;}
+  const el=document.getElementById('meuplano-content');
+  const isAdmin=ud.role==='admin'||ud.plan==='admin';
+  const isLivre=ud.plan==='livre';
+  if(isAdmin){el.innerHTML=`<div class="success-box" style="font-size:15px;font-weight:600;">👑 Você é administrador do sistema. Acesso ilimitado.</div>`;return;}
+  if(isLivre){el.innerHTML=`<div class="success-box" style="font-size:15px;font-weight:600;">✨ Você tem acesso livre (sem expiração).</div>`;return;}
+  const exp=ud.expiresAt?new Date(ud.expiresAt):null;
+  const now=new Date();
+  const days=exp?Math.ceil((exp-now)/86400000):null;
+  const expired=exp&&now>exp;
+  const planLabels={trial:'🎁 Trial gratuito',mensal:'📅 Mensal',anual:'🌟 Anual'};
+
+  // Status card
+  let statusHTML='';
+  if(expired){
+    statusHTML=`<div class="warn-box" style="margin-bottom:16px;font-size:13px;">⚠️ Seu plano venceu em ${exp.toLocaleDateString('pt-BR')}. Renove para continuar.</div>`;
+  } else if(days!==null&&days<=7){
+    statusHTML=`<div class="warn-box" style="margin-bottom:16px;font-size:13px;">⏰ Seu plano vence em ${days} dia(s) (${exp.toLocaleDateString('pt-BR')}). Renove agora!</div>`;
+  } else if(exp){
+    statusHTML=`<div class="success-box" style="margin-bottom:16px;">✅ Plano ativo até ${exp.toLocaleDateString('pt-BR')}</div>`;
+  }
+
+  el.innerHTML=`
+    <div style="max-width:600px;">
+      ${statusHTML}
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">📋 Plano Atual</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:#1a2a4a;">${planLabels[ud.plan]||ud.plan}</div>
+            <div style="font-size:13px;color:#8aa0bc;margin-top:4px;">
+              ${exp?`Válido até: ${exp.toLocaleDateString('pt-BR')}`:'Sem expiração'}
+            </div>
+            ${ud.email?`<div style="font-size:12px;color:#8aa0bc;margin-top:2px;">📧 ${ud.email}</div>`:''}
+          </div>
+          <span class="badge ${expired?'badge-red':'badge-green'}">${expired?'Vencido':'Ativo'}</span>
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-bottom:12px;">💳 Escolha seu plano</div>
+      <div class="plan-opts" style="margin-bottom:16px;">
+        <div class="plan-opt selected" id="pp-mensal" onclick="selectPayPlan('mensal')">
+          <div class="po-name">Mensal</div>
+          <div class="po-price">R$29,90</div>
+          <div class="po-sub">por mês</div>
+          <div style="font-size:10px;color:#8aa0bc;margin-top:4px;">Renovação mensal</div>
+        </div>
+        <div class="plan-opt" id="pp-anual" onclick="selectPayPlan('anual')">
+          <div class="po-name">Anual</div>
+          <div class="po-price">R$197</div>
+          <div class="po-sub">R$16,42/mês</div>
+          <div style="font-size:10px;color:#16a34a;margin-top:4px;">✨ Economize 45%</div>
+        </div>
+      </div>
+
+      <button class="btn btn-blue" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="gerarQRCode()">
+        📲 Gerar QR Code para Pagamento
+      </button>
+      <div id="qrcode-area" style="display:none;margin-top:20px;"></div>
+    </div>`;
+  window._selectedPayPlan='mensal';
+}
+
+function selectPayPlan(p){
+  window._selectedPayPlan=p;
+  document.getElementById('pp-mensal').classList.toggle('selected',p==='mensal');
+  document.getElementById('pp-anual').classList.toggle('selected',p==='anual');
+}
+
+function gerarQRCode(){
+  const plan=window._selectedPayPlan||'mensal';
+  const valor=plan==='mensal'?29.90:197.00;
+  const valorStr=valor.toFixed(2).replace('.',',');
+  const ud=currentUserData||UsersDB.getUser(currentUser);
+  const nome=ud.name.split(' ')[0];
+  const planLabel=plan==='mensal'?'Mensal':'Anual';
+
+  // PIX payload (EMV format)
+  const pixKey='tisouza@icloud.com';
+  const desc=`AreaSorte ${planLabel} ${nome}`.substring(0,25);
+  const payload=buildPixPayload(pixKey,valor,desc,'Tiago Souza','Ribeirao Preto');
+
+  // Notify admin
+  UsersDB.addNotification({
+    type:'payment_request',
+    title:'💳 Solicitação de pagamento!',
+    msg:`${ud.name} (${ud.email||'—'}) solicitou o plano ${planLabel} — R$ ${valorStr}`,
+    user:currentUser,
+    plan:plan,
+    valor:valor,
+    userName:ud.name,
+    userEmail:ud.email||'—'
+  });
+
+  // Register pending plan on user
+  const users=UsersDB.getUsers();
+  if(users[currentUser]){users[currentUser].pendingPlan=plan;UsersDB.saveUsers(users);}
+
+  const area=document.getElementById('qrcode-area');
+  area.style.display='block';
+  area.innerHTML=`
+    <div class="card" style="text-align:center;">
+      <div class="card-title" style="justify-content:center;">📲 QR Code PIX — R$ ${valorStr}</div>
+      <div style="background:#fff;padding:16px;border-radius:12px;display:inline-block;border:2px solid rgba(37,99,235,0.15);margin:10px 0;">
+        <div id="qr-img"></div>
+      </div>
+      <div class="pix-box" style="text-align:left;margin:12px 0;">
+        <div style="font-size:11px;color:#4a6080;margin-bottom:4px;">Chave PIX</div>
+        <div style="font-size:14px;font-weight:700;color:#2563eb;">tisouza@icloud.com</div>
+        <div style="font-size:11px;color:#4a6080;margin-top:6px;">Valor: <strong style="color:#1a2a4a;">R$ ${valorStr}</strong></div>
+        <div style="font-size:11px;color:#4a6080;margin-top:2px;">Plano: <strong style="color:#1a2a4a;">${planLabel}</strong></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <button class="btn btn-outline" onclick="copiarCodigoPix('${payload.replace(/'/g,"\'")}')">📋 Copiar código PIX Copia e Cola</button>
+      </div>
+      <div class="info-box" style="text-align:left;font-size:12px;">
+        ✅ Após o pagamento, o administrador irá liberar seu acesso em até <strong>24h</strong>.<br>
+        📧 Em caso de dúvidas: tisouza@icloud.com
+      </div>
+    </div>`;
+
+  // Generate QR using free API
+  const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
+  document.getElementById('qr-img').innerHTML=`<img src="${qrUrl}" alt="QR Code PIX" style="width:200px;height:200px;border-radius:8px;" onerror="this.parentNode.innerHTML='<div style=\"padding:20px;color:#8aa0bc;font-size:12px;\">Imagem indisponível.<br>Use o código Copia e Cola abaixo.</div>'">`;
+  area.scrollIntoView({behavior:'smooth'});
+}
+
+function copiarCodigoPix(payload){
+  navigator.clipboard.writeText(payload).then(()=>showNotif('Código PIX copiado! Cole no seu banco. ✅')).catch(()=>showNotif('Erro ao copiar. Use o botão copiar do seu navegador.','error'));
+}
+
+// EMV PIX Payload builder
+function buildPixPayload(key,value,desc,merchant,city){
+  function tlv(id,val){const s=String(val);return id+String(s.length).padStart(2,'0')+s;}
+  const pix=tlv('00','01')+tlv('01','12')+tlv('26',tlv('00','br.gov.bcb.pix')+tlv('01',key));
+  const amount=value.toFixed(2);
+  let pay=tlv('00','01')+pix+tlv('52','0000')+tlv('53','986')+tlv('54',amount)+tlv('58','BR')+tlv('59',merchant.substring(0,25))+tlv('60',city.substring(0,15))+tlv('62',tlv('05',desc.substring(0,25)));
+  pay+=tlv('63',crc16(pay+'6304'));
+  return pay;
+}
+function crc16(str){
+  let crc=0xFFFF;
+  for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){crc=(crc&0x8000)?(crc<<1)^0x1021:(crc<<1);}}
+  return(crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0');
+}
+
+// =============================================
+// ADMIN PANEL — IMPROVED
+// =============================================
+function loadAdminPanel(){
+  const users=UsersDB.getUsers(),list=Object.entries(users);
+  // Count only non-admin paying users
+  const payingActive=list.filter(([,u])=>u.active&&u.plan!=='admin'&&u.plan!=='livre'&&(!u.expiresAt||new Date(u.expiresAt)>new Date()));
+  const mensais=payingActive.filter(([,u])=>u.plan==='mensal').length;
+  const anuais=payingActive.filter(([,u])=>u.plan==='anual').length;
+  const ativos=payingActive.length;
+  const trials=list.filter(([,u])=>u.plan==='trial'&&(!u.expiresAt||new Date(u.expiresAt)>new Date())).length;
+  const suspensos=list.filter(([,u])=>!u.active||(u.expiresAt&&new Date(u.expiresAt)<new Date()&&u.plan!=='admin'&&u.plan!=='livre')).length;
+  const receita=(mensais*29.90)+(anuais*(197/12));
+  document.getElementById('as-total').textContent=list.length;
+  document.getElementById('as-ativos').textContent=ativos+' + '+trials+'T';
+  document.getElementById('as-suspensos').textContent=suspensos;
+  document.getElementById('as-receita').textContent='R$'+receita.toFixed(0);
+  loadAdminNotifications();
+  renderAdminUsers();
+}
+
+function loadAdminNotifications(){
+  const notifs=UsersDB.getNotifications();
+  const unread=notifs.filter(n=>!n.read).length;
+  const title=document.querySelector('#page-admin .page-header h1');
+  if(title)title.innerHTML=`👑 Painel Admin ${unread>0?`<span class="badge badge-red" style="font-size:13px;margin-left:8px;">${unread} novo(s)</span>`:''}`;
+
+  // Find or create notifications section
+  let ns=document.getElementById('admin-notifs-section');
+  if(!ns){
+    const adminPage=document.getElementById('page-admin');
+    ns=document.createElement('div');
+    ns.id='admin-notifs-section';
+    ns.style.marginBottom='18px';
+    adminPage.insertBefore(ns,adminPage.querySelector('.grid4'));
+  }
+  if(!notifs.length){ns.innerHTML='';return;}
+  const recent=notifs.slice(0,5);
+  ns.innerHTML=`<div class="card" style="margin-bottom:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div class="card-title" style="margin-bottom:0;">🔔 Notificações ${unread>0?`<span class="badge badge-red">${unread}</span>`:''}</div>
+      <button class="btn btn-outline btn-sm" onclick="UsersDB.clearNotifications();loadAdminPanel()">Limpar tudo</button>
+    </div>
+    ${recent.map(n=>`<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(37,99,235,0.07);align-items:flex-start;" onclick="UsersDB.markNotifRead(${n.id});this.style.opacity='.6'">
+      <div style="font-size:20px;flex-shrink:0;">${n.type==='payment_request'?'💳':n.type==='new_user'?'👤':'🔔'}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:#1a2a4a;">${n.title} ${!n.read?'<span class="badge badge-blue">Novo</span>':''}</div>
+        <div style="font-size:12px;color:#4a6080;margin-top:2px;">${n.msg}</div>
+        <div style="font-size:10px;color:#8aa0bc;margin-top:3px;">${new Date(n.time).toLocaleString('pt-BR')}</div>
+        ${n.type==='payment_request'?`<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-green btn-sm" onclick="event.stopPropagation();adminLiberarPagamento('${n.user}','${n.plan}')">✅ Liberar ${n.plan==='mensal'?'Mensal':'Anual'}</button></div>`:''}
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function adminLiberarPagamento(userKey,plan){
+  adminReativarComPlano(userKey,plan);
+  showNotif(`Acesso liberado para @${userKey} — plano ${plan}! ✅`);
+  loadAdminPanel();
+}
+
+function renderAdminUsers(){
+  const users=UsersDB.getUsers(),q=(document.getElementById('adm-search')?.value||'').toLowerCase();
+  const list=Object.entries(users).filter(([u,d])=>!q||u.includes(q)||d.name.toLowerCase().includes(q)||(d.email&&d.email.includes(q)));
+  document.getElementById('adm-user-count').textContent=`${list.length} usuário(s) encontrado(s)`;
+  const planBadge={admin:'badge-yellow',livre:'badge-purple',mensal:'badge-blue',anual:'badge-green',trial:'badge-purple'};
+  const planLabel={admin:'👑 Admin',livre:'✨ Livre',mensal:'📅 Mensal',anual:'🌟 Anual',trial:'🎁 Trial'};
+  document.getElementById('adm-users-list').innerHTML=list.length?list.map(([u,d])=>{
+    const exp=d.expiresAt?new Date(d.expiresAt):null,now=new Date();
+    const expired=exp&&now>exp&&d.plan!=='admin'&&d.plan!=='livre';
+    const expTxt=d.expiresAt?(expired?`<span style="color:#dc2626;font-weight:600;">Vencido: ${exp.toLocaleDateString('pt-BR')}</span>`:`Vence: ${exp.toLocaleDateString('pt-BR')}`):'Sem expiração';
+    const isSelf=u===currentUser;
+    const hasPending=d.pendingPlan?`<span class="badge badge-yellow" style="margin-left:4px;">Pgto pendente: ${d.pendingPlan}</span>`:'';
+    return`<div class="user-row">
+      <div class="user-avatar">${d.name.charAt(0).toUpperCase()}</div>
+      <div class="user-info">
+        <div class="user-name-text">${d.name} ${isSelf?'<span class="badge badge-blue">Você</span>':''} ${hasPending}</div>
+        <div class="user-meta-text">${d.email||'sem e-mail'} · ${expTxt}</div>
+        <div class="user-meta-text">${(d.jogos||[]).length} jogos · Cadastro: ${d.createdAt?new Date(d.createdAt).toLocaleDateString('pt-BR'):'—'}</div>
+      </div>
+      <span class="badge ${planBadge[d.plan]||'badge-blue'}">${planLabel[d.plan]||d.plan}</span>
+      <div class="user-actions">
+        ${expired||!d.active
+          ?`<button class="btn btn-green btn-sm" onclick="adminLiberarAcesso('${u}')">✅ Liberar</button>`
+          :`<button class="btn btn-danger btn-sm" onclick="adminSuspender('${u}')" ${isSelf?'disabled':''}>🔒 Suspender</button>`
+        }
+        <select class="form-ctrl" style="width:auto;padding:4px 8px;font-size:11px;" onchange="adminMudarPlano('${u}',this.value)">
+          <option ${d.plan==='mensal'?'selected':''} value="mensal">Mensal</option>
+          <option ${d.plan==='anual'?'selected':''} value="anual">Anual</option>
+          <option ${d.plan==='livre'?'selected':''} value="livre">Livre</option>
+          <option ${d.plan==='admin'?'selected':''} value="admin">Admin</option>
+          <option ${d.plan==='trial'?'selected':''} value="trial">Trial</option>
+        </select>
+        ${!isSelf?`<button class="btn btn-danger btn-sm" onclick="adminDeletar('${u}')">🗑️</button>`:''}
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum usuário encontrado</p></div>';
+}
+
+function adminLiberarAcesso(u){
+  // Show modal-like inline prompt
+  const users=UsersDB.getUsers();if(!users[u])return;
+  const planAtual=users[u].pendingPlan||users[u].plan||'mensal';
+  const plan=prompt(`Plano para liberar (mensal/anual/livre):\nPlano pendente: ${planAtual}`,planAtual)||planAtual;
+  adminReativarComPlano(u,plan);
+  showNotif(`Acesso de @${u} liberado como ${plan}! ✅`);
+  loadAdminPanel();
+}
+
+function adminReativarComPlano(u,plan){
+  const users=UsersDB.getUsers();if(!users[u])return;
+  users[u].active=true;users[u].plan=plan;users[u].pendingPlan=null;
+  const d=new Date();
+  if(plan==='mensal')d.setDate(d.getDate()+30);
+  else if(plan==='anual')d.setFullYear(d.getFullYear()+1);
+  if(plan!=='admin'&&plan!=='livre')users[u].expiresAt=d.toISOString();
+  else users[u].expiresAt=null;
+  UsersDB.saveUsers(users);
+}
+
 </script>
 </body>
 </html>
