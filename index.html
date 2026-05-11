@@ -307,7 +307,8 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
   <div id="register-form" style="display:none">
     <div class="form-group"><label>Nome completo</label><input type="text" id="r-name" placeholder="Ex: João Silva" autocomplete="name"></div>
     <div class="form-group"><label>E-mail</label><input type="email" id="r-email" placeholder="seu@email.com" autocomplete="email" autocapitalize="none" autocorrect="off"></div>
-    <div class="form-group"><label>Senha</label><input type="password" id="r-pass" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
+    <div class="form-group"><label>Usuário</label><input type="text" id="r-user" placeholder="Ex: joao123 (sem espaços)" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="r-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
     <button class="btn-primary" onclick="doRegister()">Criar conta</button>
     <div class="auth-extra" style="margin-top:16px;">Já tem conta? <a onclick="switchAuth('login')">Entrar</a></div>
     <div class="auth-secure">🔒 Seus dados estão protegidos</div>
@@ -585,7 +586,7 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
       <div class="card-title">➕ Criar Usuário</div>
       <div class="form-group"><label>Nome completo</label><input type="text" class="form-ctrl" id="adm-name" placeholder="Nome do usuário"></div>
       <div class="form-group"><label>E-mail ou usuário de login</label><input type="text" class="form-ctrl" id="adm-user" placeholder="email@exemplo.com ou joao123" autocapitalize="none" autocorrect="off"></div>
-      <div class="form-group"><label>Senha</label><input type="password" class="form-ctrl" id="adm-pass" placeholder="Mínimo 4 caracteres"></div>
+      <div class="form-group"><label>Senha</label><input type="password" class="form-ctrl" id="adm-pass" placeholder="Mínimo 4 caracteres"><div style="font-size:10px;color:#8aa0bc;margin-top:4px;">💡 O usuário fará login com o e-mail/usuário acima + esta senha</div></div>
       <div class="form-group"><label>Plano</label>
         <select class="form-ctrl" id="adm-plan">
           <option value="livre">Livre (sem expirar)</option>
@@ -684,13 +685,16 @@ function doLogin(){
   if(!input||!p){showAuthError('Preencha todos os campos.');return;}
   UsersDB.ensureAdmin();
   const users=UsersDB.getUsers();
-  // Find by username key, email, or loginId
+  // Search by: 1) exact key, 2) email field, 3) username field, 4) loginId field
   let foundKey=null;
-  if(users[input]){foundKey=input;}
-  else{
+  if(users[input]){
+    foundKey=input;
+  } else {
     for(const[k,v] of Object.entries(users)){
-      if(v.email&&v.email.toLowerCase()===input){foundKey=k;break;}
-      if(v.loginId&&v.loginId.toLowerCase()===input){foundKey=k;break;}
+      const matchEmail=v.email&&v.email.toLowerCase()===input;
+      const matchUser=v.username&&v.username.toLowerCase()===input;
+      const matchLogin=v.loginId&&v.loginId.toLowerCase()===input;
+      if(matchEmail||matchUser||matchLogin){foundKey=k;break;}
     }
   }
   if(!foundKey){showAuthError('Usuário ou e-mail não encontrado.');return;}
@@ -703,24 +707,25 @@ function doLogin(){
 
 function doRegister(){
   const name=document.getElementById('r-name').value.trim();
-  const email=document.getElementById('r-email').value.trim().toLowerCase();
+  const email=(document.getElementById('r-email')?.value||'').trim().toLowerCase();
+  const username=(document.getElementById('r-user')?.value||'').trim().toLowerCase();
   const p=document.getElementById('r-pass').value;
-  if(!name||!email||!p){showAuthError('Preencha todos os campos.');return;}
-  if(p.length<4){showAuthError('Senha mínima de 4 caracteres.');return;}
+  if(!name||!email||!username||!p){showAuthError('Preencha todos os campos.');return;}
+  if(p.length<6){showAuthError('Senha mínima de 6 caracteres.');return;}
   if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){showAuthError('Digite um e-mail válido.');return;}
+  if(!/^[a-z0-9_]+$/.test(username)){showAuthError('Usuário: apenas letras minúsculas, números e _ (sem espaços)');return;}
+  if(username.length<3){showAuthError('Usuário deve ter ao menos 3 caracteres.');return;}
   const users=UsersDB.getUsers();
-  // Check if email already used
+  if(users[username]){showAuthError('Este usuário já existe. Escolha outro.');return;}
   const emailUsed=Object.values(users).some(u=>u.email&&u.email.toLowerCase()===email);
   if(emailUsed){showAuthError('Este e-mail já está cadastrado.');return;}
-  // Use email prefix + random as username key
-  const u=email.replace(/[^a-z0-9]/g,'_').substring(0,20)+'_'+Date.now().toString().slice(-4);
   const trialEnd=new Date();trialEnd.setDate(trialEnd.getDate()+3);
-  const newUser={name,email,pass:btoa(p),role:'user',plan:'trial',createdAt:new Date().toISOString(),expiresAt:trialEnd.toISOString(),active:true,jogos:[],pendingPlan:null};
-  users[u]=newUser;UsersDB.saveUsers(users);
-  // Notify admin
-  UsersDB.addNotification({type:'new_user',title:'Novo cadastro!',msg:`${name} (${email}) criou uma conta. Trial de 3 dias ativo.`,user:u});
-  currentUser=u;currentUserData=newUser;
-  Store.set('as_current',u);
+  const newUser={name,email,username,pass:btoa(p),role:'user',plan:'trial',createdAt:new Date().toISOString(),expiresAt:trialEnd.toISOString(),active:true,jogos:[],pendingPlan:null};
+  users[username]=newUser;
+  UsersDB.saveUsers(users);
+  UsersDB.addNotification({type:'new_user',title:'🆕 Novo cadastro!',msg:`${name} (@${username} · ${email}) criou uma conta. Trial de 3 dias ativo.`,user:username});
+  currentUser=username;currentUserData=newUser;
+  Store.set('as_current',username);
   checkAccessAndEnter(newUser);
 }
 
@@ -791,11 +796,14 @@ function doLogout(){
   document.getElementById('l-user').value='';document.getElementById('l-pass').value='';
 }
 
-window.addEventListener('load',()=>{
+window.addEventListener('DOMContentLoaded',()=>{
   UsersDB.ensureAdmin();
-  ['l-pass','l-user'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();}));
-  ['r-pass','r-user','r-name'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doRegister();}));
+  // Safe event listeners
+  const addKey=(id,fn)=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')fn();});};
+  addKey('l-pass',doLogin);addKey('l-user',doLogin);
+  addKey('r-pass',doRegister);addKey('r-user',doRegister);addKey('r-name',doRegister);addKey('r-email',doRegister);
   const saved=Store.get('as_current',null);
+  setupDesdobramentoConfig();updateDezJogoOptions();
   if(saved){const ud=UsersDB.getUser(saved);if(ud){currentUser=saved;currentUserData=ud;checkAccessAndEnter(ud);return;}}
 });
 
@@ -1159,26 +1167,42 @@ function renderAdminUsers(){
 }
 function adminCriarUsuario(){
   const name=document.getElementById('adm-name').value.trim();
-  const emailOrUser=document.getElementById('adm-user').value.trim().toLowerCase();
+  const loginInput=document.getElementById('adm-user').value.trim().toLowerCase();
   const p=document.getElementById('adm-pass').value;
   const plan=document.getElementById('adm-plan').value;
-  if(!name||!emailOrUser||!p){showNotif('Preencha todos os campos.','error');return;}
+  if(!name||!loginInput||!p){showNotif('Preencha todos os campos.','error');return;}
   if(p.length<4){showNotif('Senha mínima 4 caracteres.','error');return;}
   const users=UsersDB.getUsers();
-  // Use email or username as key
-  const isEmail=/^[^@]+@[^@]+\.[^@]+$/.test(emailOrUser);
-  let userKey=isEmail?emailOrUser.replace(/[^a-z0-9]/g,'_').substring(0,20)+'_adm':emailOrUser;
-  // Ensure unique key
-  while(users[userKey])userKey=userKey+'_'+Math.floor(Math.random()*100);
+  // Determine if email or username was given
+  const isEmail=/^[^@]+@[^@]+\.[^@]+$/.test(loginInput);
+  // Use input directly as the key (cleaned)
+  const userKey=loginInput.replace(/[^a-z0-9_.@]/g,'_').substring(0,40);
+  if(users[userKey]){showNotif('Este usuário/e-mail já existe.','error');return;}
   let expiresAt=null;
-  if(plan==='mensal'){const d=new Date();d.setDate(d.getDate()+30);expiresAt=d.toISOString();}
-  else if(plan==='anual'){const d=new Date();d.setFullYear(d.getFullYear()+1);expiresAt=d.toISOString();}
-  users[userKey]={name,pass:btoa(p),role:plan==='admin'?'admin':'user',plan,email:isEmail?emailOrUser:'',loginId:emailOrUser,createdAt:new Date().toISOString(),expiresAt,active:true,jogos:[],pendingPlan:null};
+  const dd=new Date();
+  if(plan==='mensal'){dd.setDate(dd.getDate()+30);expiresAt=dd.toISOString();}
+  else if(plan==='anual'){dd.setFullYear(dd.getFullYear()+1);expiresAt=dd.toISOString();}
+  // Store with all possible lookup fields populated
+  users[userKey]={
+    name,
+    pass:btoa(p),
+    role:plan==='admin'?'admin':'user',
+    plan,
+    email:isEmail?loginInput:'',
+    username:!isEmail?loginInput:'',
+    loginId:loginInput,
+    createdAt:new Date().toISOString(),
+    expiresAt,
+    active:true,
+    jogos:[],
+    pendingPlan:null,
+    createdByAdmin:true
+  };
   UsersDB.saveUsers(users);
   document.getElementById('adm-name').value='';
   document.getElementById('adm-user').value='';
   document.getElementById('adm-pass').value='';
-  showNotif(`Usuário "${name}" criado! Login: ${emailOrUser} ✅`);
+  showNotif(`✅ "${name}" criado! Login: "${loginInput}" Senha: "${p}"`, 'success');
   loadAdminPanel();
 }
 function adminReativar(u){
@@ -1203,7 +1227,7 @@ function adminDeletar(u){
   const users=UsersDB.getUsers();delete users[u];UsersDB.saveUsers(users);showNotif(`@${u} deletado.`,'error');loadAdminPanel();
 }
 
-document.addEventListener('DOMContentLoaded',()=>{setupDesdobramentoConfig();updateDezJogoOptions();});
+// init handled in DOMContentLoaded above via window event
 
 // =============================================
 // MEU PLANO + PIX QR CODE
@@ -1433,7 +1457,8 @@ function renderAdminUsers(){
       <div class="user-avatar">${d.name.charAt(0).toUpperCase()}</div>
       <div class="user-info">
         <div class="user-name-text">${d.name} ${isSelf?'<span class="badge badge-blue">Você</span>':''} ${hasPending}</div>
-        <div class="user-meta-text">${d.email||'sem e-mail'} · ${expTxt}</div>
+        <div class="user-meta-text">Login: <strong>${d.loginId||d.username||d.email||'—'}</strong> · ${d.email?'📧 '+d.email:''}</div>
+        <div class="user-meta-text">${expTxt}</div>
         <div class="user-meta-text">${(d.jogos||[]).length} jogos · Cadastro: ${d.createdAt?new Date(d.createdAt).toLocaleDateString('pt-BR'):'—'}</div>
       </div>
       <span class="badge ${planBadge[d.plan]||'badge-blue'}">${planLabel[d.plan]||d.plan}</span>
