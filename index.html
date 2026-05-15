@@ -786,7 +786,7 @@ function switchAuth(tab){
 }
 function showAuthError(msg){const e=document.getElementById('auth-error');e.textContent=msg;e.style.display='block';}
 
-async async function doLogin(){
+async function doLogin(){
   const input=document.getElementById('l-user').value.trim().toLowerCase();
   const p=document.getElementById('l-pass').value;
   if(!input||!p){showAuthError('Preencha todos os campos.');return;}
@@ -917,31 +917,31 @@ function doLogout(){
   document.getElementById('l-user').value='';document.getElementById('l-pass').value='';
 }
 
-window.addEventListener('DOMContentLoaded',async()=>{
-  const addKey=(id,fn)=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')fn();});};
-  addKey('l-pass',doLogin);addKey('l-user',doLogin);
-  addKey('r-pass',doRegister);addKey('r-user',doRegister);addKey('r-name',doRegister);addKey('r-email',doRegister);
-  setupDesdobramentoConfig();updateDezJogoOptions();
-  // Load DB (JSONBin or local)
-  try{await UsersDB.load();}catch(e){UsersDB.ensureAdmin();}
-  // Auto-login
-  const saved=Store.get('as_current',null);
-  if(saved){
-    try{await UsersDB.load();}catch(e){}
-    const ud=UsersDB.getUser(saved);
-    if(ud){currentUser=saved;currentUserData=ud;checkAccessAndEnter(ud);return;}
+window.addEventListener('DOMContentLoaded', async () => {
+  // Safe keyboard shortcuts
+  const addKey = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') fn(); });
+  };
+  addKey('l-pass', doLogin); addKey('l-user', doLogin);
+  addKey('r-pass', doRegister); addKey('r-user', doRegister);
+  addKey('r-name', doRegister); addKey('r-email', doRegister);
+
+  // Init UI
+  setupDesdobramentoConfig();
+  updateDezJogoOptions();
+
+  // Load DB from JSONBin (or local fallback)
+  try { await UsersDB.load(); } catch(e) { UsersDB.ensureAdmin(); }
+
+  // Auto-login if session saved
+  const saved = Store.get('as_current', null);
+  if (saved) {
+    try { await UsersDB.load(); } catch(e) {}
+    const ud = UsersDB.getUser(saved);
+    if (ud) { currentUser = saved; currentUserData = ud; checkAccessAndEnter(ud); return; }
   }
-  // Test JSONBin connection silently
-  if(USE_JSONBIN){
-    console.log('JSONBin configurado ✅ BIN:', JSONBIN_BIN_ID);
-  }
-});};
-  addKey('l-pass',doLogin);addKey('l-user',doLogin);
-  addKey('r-pass',doRegister);addKey('r-user',doRegister);addKey('r-name',doRegister);addKey('r-email',doRegister);
-  const saved=Store.get('as_current',null);
-  setupDesdobramentoConfig();updateDezJogoOptions();
-  if(saved){const ud=UsersDB.getUser(saved);if(ud){currentUser=saved;currentUserData=ud;checkAccessAndEnter(ud);return;}}
-});
+})
 
 // =============================================
 // NAVIGATION
@@ -1178,7 +1178,7 @@ function copiarJogosSalvos(){const all=getUserJogos();const fd=document.getEleme
 function buildPDF(jogos,titulo,sub){
   const data=new Date().toLocaleDateString('pt-BR');
   const rows=jogos.map((j,i)=>{const bc=j.lot==='lotofacil'?'#2563eb':'#16a34a';return`<tr style="border-bottom:1px solid #e8eef5"><td style="padding:8px;font-weight:600;color:#4a6080;width:55px">Jogo ${i+1}</td><td style="padding:8px;font-size:11px;color:#8aa0bc;width:80px">${j.lot==='lotofacil'?'Lotofácil':'Mega-Sena'}<br>${j.data||''}</td><td style="padding:8px">${j.nums.map(n=>`<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:${bc};color:#fff;border-radius:50%;font-size:10px;font-weight:700;margin:2px;font-family:monospace">${String(n).padStart(2,'0')}</span>`).join('')}</td><td style="padding:8px;color:#8aa0bc;font-size:11px">Σ${j.nums.reduce((a,b)=>a+b,0)}</td></tr>`;}).join('');
-  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo}</title><style>body{font-family:Arial,sans-serif;background:#f0f4f8;margin:0;padding:16px}.c{max-width:740px;margin:0 auto;background:#fff;border-radius:14px;padding:28px;box-shadow:0 4px 24px rgba(30,80,180,.10)}.h{display:flex;align-items:center;gap:12px;border-bottom:2px solid #e8eef5;padding-bottom:14px;margin-bottom:18px}.logo{width:44px;height:44px;background:linear-gradient(135deg,#1a56c4,#2563eb);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}h1{font-size:17px;color:#1a2a4a;margin:0 0 2px}.sub{font-size:11px;color:#4a6080}table{width:100%;border-collapse:collapse}thead tr{background:#f0f4f8}th{padding:8px;text-align:left;font-size:9px;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px}.f{margin-top:18px;padding-top:12px;border-top:1px solid #e8eef5;font-size:10px;color:#8aa0bc;text-align:center}@media print{body{background:#fff;padding:0}.c{box-shadow:none;border-radius:0}}</style></head><body><div class="c"><div class="h"><div class="logo"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 3L16.5 10.5H24.5L18.2 15.1L20.7 22.6L14 18L7.3 22.6L9.8 15.1L3.5 10.5H11.5L14 3Z" fill="white"/></svg></div><div><h1>${titulo}</h1><div class="sub">${sub} · ${data}</div></div></div><table><thead><tr><th>Nº</th><th>Loteria</th><th>Dezenas</th><th>Info</th></tr></thead><tbody>${rows}</tbody></table><div class="f">Área da Sorte · ${data} · ${jogos.length} jogo(s)</div></div><script>window.onload=()=>window.print()<\/script></body></html>`;
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo}</title><style>body{font-family:Arial,sans-serif;background:#f0f4f8;margin:0;padding:16px}.c{max-width:740px;margin:0 auto;background:#fff;border-radius:14px;padding:28px;box-shadow:0 4px 24px rgba(30,80,180,.10)}.h{display:flex;align-items:center;gap:12px;border-bottom:2px solid #e8eef5;padding-bottom:14px;margin-bottom:18px}.logo{width:44px;height:44px;background:linear-gradient(135deg,#1a56c4,#2563eb);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}h1{font-size:17px;color:#1a2a4a;margin:0 0 2px}.sub{font-size:11px;color:#4a6080}table{width:100%;border-collapse:collapse}thead tr{background:#f0f4f8}th{padding:8px;text-align:left;font-size:9px;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px}.f{margin-top:18px;padding-top:12px;border-top:1px solid #e8eef5;font-size:10px;color:#8aa0bc;text-align:center}@media print{body{background:#fff;padding:0}.c{box-shadow:none;border-radius:0}}</style></head><body><div class="c"><div class="h"><div class="logo"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 3L16.5 10.5H24.5L18.2 15.1L20.7 22.6L14 18L7.3 22.6L9.8 15.1L3.5 10.5H11.5L14 3Z" fill="white"/></svg></div><div><h1>${titulo}</h1><div class="sub">${sub} · ${data}</div></div></div><table><thead><tr><th>Nº</th><th>Loteria</th><th>Dezenas</th><th>Info</th></tr></thead><tbody>${rows}</tbody></table><div class="f">Área da Sorte · ${data} · ${jogos.length} jogo(s)</div></div><scr'+'ipt>window.onload=()=>window.print()<\/scr'+'ipt></body></html>`;
   const b=new Blob([html],{type:'text/html'}),url=URL.createObjectURL(b),w=window.open(url,'_blank');
   if(!w){showNotif('Permita pop-ups para PDF.','error');return;}
   setTimeout(()=>URL.revokeObjectURL(url),30000);showNotif('PDF pronto! Use Ctrl+P para salvar 📄');
