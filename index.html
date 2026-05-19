@@ -632,128 +632,127 @@ const Store={
   },
   remove(k){delete _mem[k];try{localStorage.removeItem(k);}catch(e){}},
 };
-// =============================================
-// JSONBIN CONFIG
-// =============================================
-const JSONBIN_MASTER_KEY = '$2a$10$7oOfzGqUSTJpdcmHjgLLJuUgdwX6TEeWshrUYGwzGfgcu1oAnSfxq';
-const JSONBIN_BIN_ID     = '6a0315e9c0954111d810a4bb';
-const USE_JSONBIN = JSONBIN_BIN_ID !== '' && JSONBIN_MASTER_KEY !== '';
+// Firebase is configured below
 
 // =============================================
-// USER DB — JSONBin.io + localStorage fallback
+// FIREBASE CONFIG + USER DB
 // =============================================
-const UsersDB={
-  _cache:null,
+const FB_URL = 'https://area-da-sorte-default-rtdb.firebaseio.com';
 
-  _default(){
-    return{
-      users:{tisouza:{name:'Tiago Souza',pass:btoa('souz@11'),role:'admin',plan:'admin',
-        email:'tisouza@icloud.com',username:'tisouza',loginId:'tisouza',
-        createdAt:'2025-01-01T00:00:00.000Z',expiresAt:null,active:true,jogos:[],pendingPlan:null}},
+const UsersDB = {
+  _cache: null,
+
+  _default() {
+    return {
+      users: {
+        tisouza: {
+          name:'Tiago Souza', pass:btoa('souz@11'), role:'admin', plan:'admin',
+          email:'tisouza@icloud.com', username:'tisouza', loginId:'tisouza',
+          createdAt:'2025-01-01T00:00:00.000Z', expiresAt:null,
+          active:true, jogos:[], pendingPlan:null
+        }
+      },
       notifications:[]
     };
   },
 
-  _ensureAdmin(d){
-    if(!d||!d.users)d={users:{},notifications:[]};
-    if(!d.notifications)d.notifications=[];
-    if(!d.users['tisouza']){
-      d.users['tisouza']={name:'Tiago Souza',pass:btoa('souz@11'),role:'admin',plan:'admin',
-        email:'tisouza@icloud.com',username:'tisouza',loginId:'tisouza',
-        createdAt:'2025-01-01T00:00:00.000Z',expiresAt:null,active:true,jogos:[],pendingPlan:null};
+  _ensureAdmin(d) {
+    if (!d || !d.users) d = {users:{}, notifications:[]};
+    if (!d.notifications) d.notifications = [];
+    if (!d.users['tisouza']) {
+      d.users['tisouza'] = {
+        name:'Tiago Souza', pass:btoa('souz@11'), role:'admin', plan:'admin',
+        email:'tisouza@icloud.com', username:'tisouza', loginId:'tisouza',
+        createdAt:'2025-01-01T00:00:00.000Z', expiresAt:null,
+        active:true, jogos:[], pendingPlan:null
+      };
     }
     return d;
   },
 
-  // Fetch from JSONBin — try direct, then two CORS proxies
-  async _get(){
-    const url=`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`;
-    const hdrs={'X-Master-Key':JSONBIN_MASTER_KEY,'X-Bin-Meta':'false'};
-    const attempts=[
-      ()=>fetch(url,{headers:hdrs,signal:AbortSignal.timeout(7000)}),
-      ()=>fetch('https://corsproxy.io/?'+encodeURIComponent(url),{headers:hdrs,signal:AbortSignal.timeout(7000)}),
-      ()=>fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{signal:AbortSignal.timeout(7000)})
-    ];
-    for(const fn of attempts){
-      try{
-        const r=await fn();
-        if(!r.ok)continue;
-        let d=await r.json();
-        if(typeof d==='string')d=JSON.parse(d);
-        if(d&&d.record)d=d.record;
-        if(d&&d.users)return d;
-      }catch(e){continue;}
-    }
-    throw new Error('All JSONBin attempts failed');
-  },
-
-  // Save to JSONBin — try direct, then proxy
-  async _put(data){
-    const url=`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
-    const hdrs={'Content-Type':'application/json','X-Master-Key':JSONBIN_MASTER_KEY};
-    const body=JSON.stringify(data);
-    const attempts=[
-      ()=>fetch(url,{method:'PUT',headers:hdrs,body,signal:AbortSignal.timeout(8000)}),
-      ()=>fetch('https://corsproxy.io/?'+encodeURIComponent(url),{method:'PUT',headers:hdrs,body,signal:AbortSignal.timeout(8000)})
-    ];
-    for(const fn of attempts){
-      try{const r=await fn();if(r.ok){console.log('DB saved ✅');return;}}catch(e){continue;}
-    }
-    console.warn('DB save failed — saved locally only');
-  },
-
-  async load(){
-    if(USE_JSONBIN){
-      try{
-        let d=await this._get();
-        d=this._ensureAdmin(d);
-        this._cache=d;
-        Store.set('as_users_cache',d);
-        Store.set('as_users_cache_ts',Date.now());
-        console.log('DB loaded from JSONBin ✅',Object.keys(d.users).length,'usuários');
-        return d;
-      }catch(e){console.warn('JSONBin load failed, usando cache local:',e.message);}
-    }
-    let d=Store.get('as_users_cache',null)||Store.get('as_users',null)||this._default();
-    d=this._ensureAdmin(d);
-    this._cache=d;
+  // Firebase GET
+  async _fbGet() {
+    const r = await fetch(`${FB_URL}/db.json`, {signal:AbortSignal.timeout(6000)});
+    if (!r.ok) throw new Error('GET ' + r.status);
+    const d = await r.json();
+    if (!d || !d.users) throw new Error('empty');
     return d;
   },
 
-  async save(d){
-    d=this._ensureAdmin(d);
-    this._cache=d;
-    Store.set('as_users_cache',d);
-    Store.set('as_users_cache_ts',Date.now());
-    Store.set('as_users',d);
-    if(USE_JSONBIN)this._put(d);// fire and forget
+  // Firebase PUT
+  _fbPut(data) {
+    fetch(`${FB_URL}/db.json`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data),
+      signal:AbortSignal.timeout(8000)
+    }).then(r => {
+      if(r.ok) console.log('Firebase saved ✅');
+      else console.warn('Firebase save error:', r.status);
+    }).catch(e => console.warn('Firebase save failed:', e.message));
   },
 
-  getAll(){
-    if(this._cache)return this._cache;
-    let d=Store.get('as_users_cache',null)||Store.get('as_users',null)||this._default();
-    d=this._ensureAdmin(d);
-    this._cache=d;
+  // Load local instantly, sync Firebase in background
+  load() {
+    let d = Store.get('as_db', null) || this._default();
+    d = this._ensureAdmin(d);
+    this._cache = d;
+    // Background sync — non-blocking
+    this._sync();
     return d;
   },
-  getUsers(){return this.getAll().users||{};},
-  getUser(u){return this.getUsers()[u]||null;},
-  saveUsers(u){const d=this.getAll();d.users=u;this.save(d);},
-  setUser(u,data){const users=this.getUsers();users[u]=data;this.saveUsers(users);},
-  getNotifications(){return this.getAll().notifications||[];},
-  addNotification(notif){
-    const d=this.getAll();if(!d.notifications)d.notifications=[];
-    d.notifications.unshift({...notif,id:Date.now(),read:false,time:new Date().toISOString()});
-    if(d.notifications.length>50)d.notifications=d.notifications.slice(0,50);
+
+  async _sync() {
+    try {
+      let d = await this._fbGet();
+      d = this._ensureAdmin(d);
+      const localUsers = Object.keys(this._cache?.users || {}).length;
+      const cloudUsers = Object.keys(d.users || {}).length;
+      if (cloudUsers >= localUsers) {
+        this._cache = d;
+        Store.set('as_db', d);
+        console.log('Firebase synced ✅', cloudUsers, 'usuários');
+      }
+    } catch(e) {
+      console.warn('Firebase sync failed, using local data:', e.message);
+    }
+  },
+
+  save(d) {
+    d = this._ensureAdmin(d);
+    this._cache = d;
+    Store.set('as_db', d);
+    this._fbPut(d);
+  },
+
+  getAll() {
+    if (this._cache) return this._cache;
+    let d = Store.get('as_db', null) || this._default();
+    d = this._ensureAdmin(d);
+    this._cache = d;
+    return d;
+  },
+
+  getUsers()   { return this.getAll().users || {}; },
+  getUser(u)   { return this.getUsers()[u] || null; },
+  saveUsers(u) { const d = this.getAll(); d.users = u; this.save(d); },
+  setUser(u,v) { const users = this.getUsers(); users[u] = v; this.saveUsers(users); },
+
+  getNotifications() { return this.getAll().notifications || []; },
+  addNotification(n) {
+    const d = this.getAll();
+    if (!d.notifications) d.notifications = [];
+    d.notifications.unshift({...n, id:Date.now(), read:false, time:new Date().toISOString()});
+    if (d.notifications.length > 50) d.notifications = d.notifications.slice(0,50);
     this.save(d);
   },
-  markNotifRead(id){
-    const d=this.getAll();
-    if(d.notifications)d.notifications=d.notifications.map(n=>n.id===id?{...n,read:true}:n);
+  markNotifRead(id) {
+    const d = this.getAll();
+    if (d.notifications) d.notifications = d.notifications.map(n => n.id===id ? {...n,read:true} : n);
     this.save(d);
   },
-  clearNotifications(){const d=this.getAll();d.notifications=[];this.save(d);},
-  ensureAdmin(){this.getAll();}
+  clearNotifications() { const d = this.getAll(); d.notifications = []; this.save(d); },
+  ensureAdmin() { this.getAll(); }
 };
 
 // =============================================
@@ -786,17 +785,14 @@ function switchAuth(tab){
 }
 function showAuthError(msg){const e=document.getElementById('auth-error');e.textContent=msg;e.style.display='block';}
 
-async function doLogin(){
+function doLogin(){
   const input=document.getElementById('l-user').value.trim().toLowerCase();
   const p=document.getElementById('l-pass').value;
   if(!input||!p){showAuthError('Preencha todos os campos.');return;}
   const btn=document.querySelector('#login-form .btn-primary');
   if(btn){btn.textContent='Entrando...';btn.disabled=true;}
   // Always reload from JSONBin to get latest users
-  showAuthLoading(true);
-  try{ await UsersDB.load(); }catch(e){}
-  showAuthLoading(false);
-  if(btn){btn.textContent='→ Entrar';btn.disabled=false;}
+if(btn){btn.textContent='→ Entrar';btn.disabled=false;}
   const users=UsersDB.getUsers();
   // Search by: 1) exact key 2) email 3) username 4) loginId
   let foundKey=null;
@@ -826,10 +822,7 @@ async function doRegister(){
   if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){showAuthError('Digite um e-mail válido.');return;}
   if(!/^[a-z0-9_]+$/.test(username)){showAuthError('Usuário: apenas letras minúsculas, números e _ (sem espaços)');return;}
   if(username.length<3){showAuthError('Usuário deve ter ao menos 3 caracteres.');return;}
-  showAuthLoading(true);
-  try{ await UsersDB.load(); }catch(e){}
-  showAuthLoading(false);
-  const users=UsersDB.getUsers();
+const users=UsersDB.getUsers();
   if(users[username]){showAuthError('Este usuário já existe. Escolha outro.');return;}
   const emailUsed=Object.values(users).some(u=>u.email&&u.email.toLowerCase()===email);
   if(emailUsed){showAuthError('Este e-mail já está cadastrado.');return;}
@@ -917,8 +910,8 @@ function doLogout(){
   document.getElementById('l-user').value='';document.getElementById('l-pass').value='';
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
-  // Safe keyboard shortcuts
+window.addEventListener('DOMContentLoaded', () => {
+  // Keyboard shortcuts
   const addKey = (id, fn) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') fn(); });
@@ -931,13 +924,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupDesdobramentoConfig();
   updateDezJogoOptions();
 
-  // Load DB from JSONBin (or local fallback)
-  try { await UsersDB.load(); } catch(e) { UsersDB.ensureAdmin(); }
+  // Load local data instantly + sync Firebase in background
+  UsersDB.load();
 
   // Auto-login if session saved
   const saved = Store.get('as_current', null);
   if (saved) {
-    try { await UsersDB.load(); } catch(e) {}
     const ud = UsersDB.getUser(saved);
     if (ud) { currentUser = saved; currentUserData = ud; checkAccessAndEnter(ud); return; }
   }
@@ -1275,7 +1267,6 @@ function renderResultado(d,lot){
 // ADMIN PANEL
 // =============================================
 async function loadAdminPanel(){
-  await UsersDB.load();
   const users=UsersDB.getUsers(),list=Object.entries(users);
   const ativos=list.filter(([,u])=>u.active&&(u.plan==='admin'||u.plan==='livre'||!u.expiresAt||new Date(u.expiresAt)>new Date())).length;
   const suspensos=list.filter(([,u])=>!u.active||(u.expiresAt&&new Date(u.expiresAt)<new Date()&&u.plan!=='admin'&&u.plan!=='livre')).length;
