@@ -275,6 +275,41 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
   .ball-sm{width:22px;height:22px;font-size:8px;}
   .grid4{grid-template-columns:1fr 1fr;}
 }
+
+/* ── ANTI-COPY / ANTI-SELECT ── */
+body, .main, .sidebar, .page {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/* Allow typing in inputs/textareas */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+img { pointer-events: none; -webkit-user-drag: none; }
+
+
+/* ── CONTENT PROTECTION ── */
+body {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+/* Allow selection only in input fields */
+input, textarea {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  user-select: text !important;
+}
+/* Hide print content */
+@media print {
+  body { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -393,6 +428,12 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
   </div>
   <div class="nav-item" onclick="navTo('resultados')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Resultados
+  </div>
+  <div class="nav-item" id="nav-meusjogos" onclick="navTo('meusjogos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Meus Jogos
+  </div>
+  <div class="nav-item" id="nav-meusjogos" onclick="navTo('meusjogos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg>Meus Jogos
   </div>
   <div class="nav-item" id="nav-meuplano" onclick="navTo('meuplano')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Meu Plano
@@ -566,6 +607,86 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
   <div id="resultado-content" style="display:none;"></div>
 </div>
 
+<!-- MEUS JOGOS -->
+<div class="page" id="page-meusjogos">
+  <div class="page-header">
+    <h1>🎮 Meus Jogos</h1>
+    <p>Todos os seus jogos salvos em um só lugar</p>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">📅 Data</label>
+        <select class="form-ctrl" id="mj-filtro-data" onchange="loadMeusJogos()" style="font-size:13px;"></select>
+      </div>
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🎱 Loteria</label>
+        <select class="form-ctrl" id="mj-filtro-lot" onchange="loadMeusJogos()" style="font-size:13px;">
+          <option value="">Todas</option>
+          <option value="lotofacil">Lotofácil</option>
+          <option value="megasena">Mega-Sena</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🏆 Status</label>
+        <select class="form-ctrl" id="mj-filtro-status" onchange="loadMeusJogos()" style="font-size:13px;">
+          <option value="">Todos</option>
+          <option value="premiado">⭐ Premiados</option>
+          <option value="normal">Não premiados</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🔍 Buscar números</label>
+        <input type="text" class="form-ctrl" id="mj-filtro-nums" placeholder="Ex: 07 11 20" oninput="loadMeusJogos()" style="font-size:13px;">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="mjLimparFiltros()">🔄 Limpar filtros</button>
+      <span id="mj-count" style="font-size:12px;color:var(--text3);margin-left:4px;"></span>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="mjCopiarTodos()">📋 Copiar seleção</button>
+        <button class="btn btn-blue btn-sm" onclick="mjExportarPDF()">📄 PDF seleção</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTA -->
+  <div id="mj-loading" class="loading" style="display:none;"><div class="spinner"></div><p>Carregando jogos...</p></div>
+  <div id="mj-lista"></div>
+  <div id="mj-empty" class="empty-state" style="display:none;">
+    <div class="empty-icon">🎮</div>
+    <p>Nenhum jogo encontrado</p>
+    <p style="font-size:12px;margin-top:6px;">Gere jogos no Gerador e salve-os aqui</p>
+    <button class="btn btn-blue" style="margin-top:14px;" onclick="navTo('gerador')">⚡ Ir para o Gerador</button>
+  </div>
+</div>
+
+<!-- MEUS JOGOS -->
+<div class="page" id="page-meusjogos">
+  <div class="page-header"><h1>🎮 Meus Jogos</h1><p>Todos os seus jogos salvos em um só lugar</p></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+    <select class="form-ctrl" id="mj-filtro-data" onchange="renderMeusJogos()" style="width:auto;padding:7px 12px;font-size:13px;"></select>
+    <select class="form-ctrl" id="mj-filtro-lot" onchange="renderMeusJogos()" style="width:auto;padding:7px 12px;font-size:13px;">
+      <option value="">🎲 Todos os jogos</option>
+      <option value="lotofacil">🔵 Lotofácil</option>
+      <option value="megasena">🟢 Mega-Sena</option>
+    </select>
+    <select class="form-ctrl" id="mj-filtro-premio" onchange="renderMeusJogos()" style="width:auto;padding:7px 12px;font-size:13px;">
+      <option value="">🏆 Todos os resultados</option>
+      <option value="premiados">✅ Com acertos (11+)</option>
+      <option value="nao_premiados">❌ Sem prêmio</option>
+      <option value="sem_resultado">⏳ Sem resultado ainda</option>
+    </select>
+    <button class="btn btn-outline btn-sm" onclick="copiarMeusJogos()">📋 Copiar</button>
+    <button class="btn btn-outline btn-sm" onclick="exportarPDFMeusJogos()">📄 PDF</button>
+    <button class="btn btn-danger btn-sm" onclick="limparMeusJogos()">🗑️ Limpar tudo</button>
+  </div>
+  <div id="mj-stats" style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;"></div>
+  <div id="mj-content"></div>
+</div>
+
 <!-- MEU PLANO -->
 <div class="page" id="page-meuplano">
   <div class="page-header"><h1>💳 Meu Plano</h1><p>Gerencie sua assinatura</p></div>
@@ -620,6 +741,67 @@ input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
 </div><!-- /main -->
 </div><!-- /app -->
 <script>
+// ── CONTENT PROTECTION ──
+(function(){
+  // Disable right-click context menu
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+    return false;
+  }, true);
+
+  // Disable copy/cut
+  document.addEventListener('copy', function(e){
+    // Allow copy in inputs/textareas for usability
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    e.preventDefault();
+    return false;
+  }, true);
+  document.addEventListener('cut', function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    e.preventDefault();
+    return false;
+  }, true);
+
+  // Disable keyboard shortcuts for copy/save/print/view-source
+  document.addEventListener('keydown', function(e){
+    const ctrl = e.ctrlKey || e.metaKey;
+    if(!ctrl) return;
+    const blocked = ['c','x','u','s','p','a'];
+    if(blocked.includes(e.key.toLowerCase())){
+      // Allow Ctrl+C in inputs
+      if((e.key==='c'||e.key==='x'||e.key==='a') &&
+         (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')) return;
+      e.preventDefault();
+      return false;
+    }
+    // Block F12, Ctrl+Shift+I, Ctrl+Shift+J (devtools)
+    if(e.key==='F12'){e.preventDefault();return false;}
+    if(ctrl && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())){
+      e.preventDefault();return false;
+    }
+  }, true);
+
+  // Disable drag
+  document.addEventListener('dragstart', function(e){
+    if(e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
+      e.preventDefault();return false;
+    }
+  }, true);
+
+  // Disable text selection via mouse (except inputs)
+  document.addEventListener('mousedown', function(e){
+    if(e.detail>1 && e.target.tagName!=='INPUT' && e.target.tagName!=='TEXTAREA'){
+      e.preventDefault();
+    }
+  }, false);
+
+  // Disable print shortcut
+  window.addEventListener('beforeprint', function(e){
+    e.preventDefault();
+    return false;
+  });
+})();
+
 // =============================================
 // STORAGE
 // =============================================
@@ -838,14 +1020,42 @@ const users=UsersDB.getUsers();
 
 function checkAccessAndEnter(ud){
   if(ud.role==='admin'||ud.plan==='admin'||ud.plan==='livre'){enterApp(ud);return;}
-  if(!ud.active){showPaywall(ud);return;}
-  if(ud.expiresAt){const exp=new Date(ud.expiresAt);if(new Date()>exp){showPaywall(ud);return;}}
+  // Check suspended
+  if(!ud.active){showSuspendedScreen(ud);return;}
+  // Check expired
+  if(ud.expiresAt){const exp=new Date(ud.expiresAt);if(new Date()>exp){showSuspendedScreen(ud);return;}}
   enterApp(ud);
 }
-function showPaywall(ud){
-  // Enter app but redirect to Meu Plano only
-  enterApp(ud,true);
-  setTimeout(()=>navTo('meuplano'),100);
+
+function showSuspendedScreen(ud){
+  // Hide all screens, show suspended
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='none';
+  const ss=document.getElementById('suspended-screen');
+  ss.style.display='flex';
+  // Set message
+  const exp=ud.expiresAt?new Date(ud.expiresAt):null;
+  const expired=exp&&new Date()>exp;
+  const msg=!ud.active
+    ?'Sua conta foi suspensa pelo administrador.'
+    :expired?`Seu plano venceu em ${exp.toLocaleDateString('pt-BR')}.`
+    :'Acesso restrito.';
+  const el=document.getElementById('suspended-msg');
+  if(el) el.textContent=msg+' Realize o pagamento via PIX para reativar seu acesso.';
+}
+
+function showSuspendedScreen(ud){
+  // Hide everything
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='none';
+  // Show suspended screen
+  const exp=ud.expiresAt?new Date(ud.expiresAt).toLocaleDateString('pt-BR'):'—';
+  const isExpired=ud.expiresAt&&new Date()>new Date(ud.expiresAt);
+  const msg=!ud.active
+    ?'Sua conta foi suspensa pelo administrador.'
+    :`Seu plano ${isExpired?'venceu em '+exp:'está inativo'}.`;
+  document.getElementById('suspended-msg').textContent=msg+' Realize o pagamento via PIX para reativar seu acesso.';
+  document.getElementById('suspended-screen').style.display='flex';
 }
 
 function showSuspended(ud){
@@ -938,7 +1148,7 @@ window.addEventListener('DOMContentLoaded', () => {
 // =============================================
 // NAVIGATION
 // =============================================
-const pageNames={dashboard:'Início',desdobramentos:'Desdobramentos',gerador:'Gerador',inteligencia:'Inteligência',combinacoes:'Combinações',resultados:'Resultados',meuplano:'Meu Plano',admin:'Admin'};
+const pageNames={dashboard:'Início',desdobramentos:'Desdobramentos',gerador:'Gerador',inteligencia:'Inteligência',combinacoes:'Combinações',resultados:'Resultados',meusjogos:'Meus Jogos',meuplano:'Meu Plano',admin:'Admin'};
 function toggleSidebar(){
   const sb=document.getElementById('sidebar'),ov=document.getElementById('overlay');
   sb.classList.toggle('open');ov.classList.toggle('show');
@@ -947,7 +1157,21 @@ function toggleSidebar(){
   document.getElementById('hb2').style.opacity=open?'0':'';
   document.getElementById('hb3').style.transform=open?'rotate(-45deg) translate(5px,-5px)':'';
 }
+function isUserBlocked(){
+  if(!currentUser||!currentUserData)return false;
+  const ud=UsersDB.getUser(currentUser)||currentUserData;
+  if(ud.role==='admin'||ud.plan==='admin'||ud.plan==='livre')return false;
+  if(!ud.active)return true;
+  if(ud.expiresAt&&new Date()>new Date(ud.expiresAt))return true;
+  return false;
+}
+
 function navTo(page){
+  // Re-check access on every navigation (catches admin-suspended users)
+  if(page!=='meuplano'&&isUserBlocked()){
+    showSuspendedScreen(currentUserData||UsersDB.getUser(currentUser)||{});
+    return;
+  }
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const ni=document.querySelector(`.nav-item[onclick="navTo('${page}')"]`);if(ni)ni.classList.add('active');
@@ -959,6 +1183,8 @@ function navTo(page){
   if(page==='resultados')loadUltimoResultado();
   if(page==='gerador')loadJogosSalvos();
   if(page==='admin')loadAdminPanel();
+  if(page==='meusjogos')loadMeusJogos();
+  if(page==='meusjogos')loadMeusJogos();
   if(page==='meuplano')loadMeuPlano();
 }
 function setLotTab(el,section){
@@ -1131,13 +1357,19 @@ function setUserJogos(jogos){
   Store.set('as_jogos_'+currentUser,jogos);
 }
 function salvarJogo(nums,lot){
-  const jogos=getUserJogos();jogos.push({id:Date.now()+Math.random(),lot,nums,data:new Date().toLocaleDateString('pt-BR')});
+  const jogos=getUserJogos();
+  // Store concurso reference for result checking
+  const ultimoConcurso = window._ultimoConcurso?.[lot]||null;
+  jogos.push({id:Date.now()+Math.random(),lot,nums,
+    data:new Date().toLocaleDateString('pt-BR'),
+    concurso:ultimoConcurso});
   setUserJogos(jogos);showNotif('Jogo salvo! ✅');loadJogosSalvos();
 }
 function salvarTodosJogos(){
   const{jogos,lot}=window._jogosAtuais||{};if(!jogos)return;
   const saved=getUserJogos(),data=new Date().toLocaleDateString('pt-BR');
-  jogos.forEach(nums=>saved.push({id:Date.now()+Math.random(),lot,nums,data}));
+  const ultimoConcurso = window._ultimoConcurso?.[lot]||null;
+  jogos.forEach(nums=>saved.push({id:Date.now()+Math.random(),lot,nums,data,concurso:ultimoConcurso}));
   setUserJogos(saved);showNotif(`${jogos.length} jogos salvos! ✅`);loadJogosSalvos();
 }
 function deletarJogo(id){
@@ -1255,12 +1487,64 @@ async function navResultado(dir){
 let _buscarTO=null;
 function buscarConcurso(){clearTimeout(_buscarTO);const v=document.getElementById('busca-concurso').value;if(!v)return;_buscarTO=setTimeout(async()=>{document.getElementById('resultado-loading').innerHTML='<div class="spinner"></div><p>Buscando...</p>';document.getElementById('resultado-loading').style.display='block';document.getElementById('resultado-content').style.display='none';try{const d=await fetchLoteria(currentLot.resultados,v);resultadoConcursoAtual=d.numero;renderResultado(d,currentLot.resultados);}catch(e){showNotif('Concurso não encontrado.','error');document.getElementById('resultado-loading').style.display='none';}},700);}
 function renderResultado(d,lot){
-  document.getElementById('resultado-loading').style.display='none';document.getElementById('resultado-content').style.display='block';
-  const balls=d.dezenasSorteadasOrdemSorteio||d.listaDezenas||d.dezenas||[];
+  document.getElementById('resultado-loading').style.display='none';
+  document.getElementById('resultado-content').style.display='block';
+  const balls=(d.dezenasSorteadasOrdemSorteio||d.listaDezenas||d.dezenas||[]).map(n=>parseInt(n));
+
+  // Cache this result for Meus Jogos
+  if(!window._ultimoConcurso) window._ultimoConcurso={};
+  window._ultimoConcurso[lot]=d.numero;
+  _resultadosCache[lot+'_'+d.numero]=balls;
+
   const premios=d.listaRateioPremio||d.premiacoes||[];
-  let premHTML='';if(premios.length)premHTML=`<div style="margin-top:14px;"><div class="card-title">🏆 Premiação</div><div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Faixa</th><th>Ganhadores</th><th>Prêmio</th></tr></thead><tbody>${premios.map(p=>`<tr><td>${p.descricaoFaixa||p.acertos||''}</td><td>${(p.numeroDeGanhadores||p.ganhadores||0).toLocaleString('pt-BR')}</td><td style="color:#16a34a;font-weight:600;">R$ ${parseFloat(p.valorPremio||p.premio||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')}</tbody></table></div></div>`;
+  let premHTML='';
+  if(premios.length) premHTML=`<div style="margin-top:14px;"><div class="card-title">🏆 Premiação Oficial</div><div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Faixa</th><th>Ganhadores</th><th>Prêmio</th></tr></thead><tbody>${premios.map(p=>`<tr><td>${p.descricaoFaixa||p.acertos||''}</td><td>${(p.numeroDeGanhadores||p.ganhadores||0).toLocaleString('pt-BR')}</td><td style="color:#16a34a;font-weight:600;">R$ ${parseFloat(p.valorPremio||p.premio||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')}</tbody></table></div></div>`;
+
+  // My games for this concurso
+  const meusJogos = getUserJogos().filter(j=>j.lot===lot);
+  let meusHTML = '';
+  if(meusJogos.length){
+    const comAcertos = meusJogos.map(j=>{
+      const ac=j.nums.filter(n=>balls.includes(n)).length;
+      return {...j,acertos:ac};
+    }).sort((a,b)=>b.acertos-a.acertos);
+
+    const bc=lot==='lotofacil'?'ball-loto':'ball-mega';
+    const minPremio=lot==='lotofacil'?11:4;
+    meusHTML=`<div style="margin-top:16px;">
+      <div class="card-title">🎮 Meus Jogos neste Concurso</div>
+      ${comAcertos.map((j,i)=>{
+        const premiado=j.acertos>=minPremio;
+        return`<div class="game-row" style="border-color:${premiado?'rgba(22,163,74,.4)':'rgba(37,99,235,.1)'};">
+          <div class="game-row-header">
+            <div style="font-size:12px;color:var(--text2);">Jogo ${i+1} · Σ${j.nums.reduce((a,b)=>a+b,0)}</div>
+            <span class="badge ${premiado?'badge-green':'badge-red'}">${j.acertos} acertos${premiado?' 🏆':''}</span>
+          </div>
+          <div class="balls">${j.nums.map(n=>{
+            const hit=balls.includes(n);
+            return`<div class="ball ${bc} ball-sm" style="${hit?'box-shadow:0 0 0 2px #16a34a;':'opacity:0.5;'}">${String(n).padStart(2,'00')}</div>`;
+          }).join('')}</div>
+          <div class="pbar" style="margin-top:8px;"><div class="pbar-fill" style="width:${Math.round(j.acertos/j.nums.length*100)}%;background:${premiado?'#16a34a':'#ef4444'}"></div></div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
   const prox=d.valorEstimadoProximoConcurso||0;
-  document.getElementById('resultado-content').innerHTML=`<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;"><h2 style="font-size:17px;font-weight:700;color:var(--text);">${lot==='lotofacil'?'🔵':'🟢'} Concurso ${d.numero}</h2><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:12px;color:var(--text3);">${d.dataApuracao||''}</span>${d.acumulado?'<span class="badge badge-yellow">⚡ Acumulou!</span>':''}</div></div><div class="card-title">🎱 Números Sorteados</div><div class="balls">${balls.map(n=>`<div class="ball ball-result">${String(n).padStart(2,'0')}</div>`).join('')}</div>${premHTML}${prox>0?`<div class="info-box" style="margin-top:12px;">📈 Próximo concurso estimado em <strong>R$ ${prox.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></div>`:''}</div>`;
+  document.getElementById('resultado-content').innerHTML=`<div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <h2 style="font-size:17px;font-weight:700;color:var(--text);">${lot==='lotofacil'?'🔵':'🟢'} Concurso ${d.numero}</h2>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--text3);">${d.dataApuracao||''}</span>
+        ${d.acumulado?'<span class="badge badge-yellow">⚡ Acumulou!</span>':''}
+      </div>
+    </div>
+    <div class="card-title">🎱 Números Sorteados</div>
+    <div class="balls">${balls.map(n=>`<div class="ball ball-result">${String(n).padStart(2,'00')}</div>`).join('')}</div>
+    ${premHTML}
+    ${meusHTML}
+    ${prox>0?`<div class="info-box" style="margin-top:12px;">📈 Próximo concurso estimado em <strong>R$ ${prox.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></div>`:''}
+  </div>`;
 }
 
 // =============================================
@@ -1415,6 +1699,264 @@ function gerarQRDash(){
     const users=UsersDB.getUsers();
     if(users[currentUser]){users[currentUser].pendingPlan=plan;UsersDB.saveUsers(users);}
   }
+}
+
+// =============================================
+// MEUS JOGOS
+// =============================================
+
+// Cache de resultados já conferidos
+let _resultadosCache = {};
+
+async function loadMeusJogos(){
+  renderMeusJogosFilters();
+  await conferirTodosJogos();
+  renderMeusJogos();
+}
+
+function renderMeusJogosFilters(){
+  const jogos = getUserJogos();
+  const datas = [...new Set(jogos.map(j=>j.data))];
+  const sel = document.getElementById('mj-filtro-data');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">📅 Todas as datas</option>';
+  datas.forEach(d => sel.innerHTML += `<option value="${d}" ${d===cur?'selected':''}>${d}</option>`);
+}
+
+async function conferirTodosJogos(){
+  const jogos = getUserJogos();
+  // Get unique loterias + concursos needed
+  const needed = {};
+  jogos.forEach(j => {
+    if(j.concurso && !_resultadosCache[j.lot+'_'+j.concurso]){
+      if(!needed[j.lot]) needed[j.lot] = new Set();
+      needed[j.lot].add(j.concurso);
+    }
+  });
+  // Fetch missing results
+  for(const lot of Object.keys(needed)){
+    for(const concurso of needed[lot]){
+      try{
+        const d = await fetchLoteria(lot, concurso);
+        const balls = (d.dezenasSorteadasOrdemSorteio||d.listaDezenas||[]).map(n=>parseInt(n));
+        _resultadosCache[lot+'_'+concurso] = balls;
+      }catch(e){}
+    }
+  }
+}
+
+function calcAcertos(nums, resultado){
+  if(!resultado||!resultado.length) return null;
+  return nums.filter(n => resultado.includes(n)).length;
+}
+
+function premioLabel(lot, acertos){
+  if(acertos === null) return null;
+  if(lot === 'lotofacil'){
+    if(acertos >= 15) return {label:'🏆 Sena!', cls:'badge-green', pts:acertos};
+    if(acertos >= 14) return {label:'🥇 14 pts', cls:'badge-green', pts:acertos};
+    if(acertos >= 13) return {label:'🥈 13 pts', cls:'badge-blue', pts:acertos};
+    if(acertos >= 12) return {label:'🥉 12 pts', cls:'badge-blue', pts:acertos};
+    if(acertos >= 11) return {label:'✅ 11 pts', cls:'badge-blue', pts:acertos};
+    return {label:`❌ ${acertos} pts`, cls:'badge-red', pts:acertos};
+  } else {
+    if(acertos >= 6) return {label:'🏆 Sena!', cls:'badge-green', pts:acertos};
+    if(acertos >= 5) return {label:'🥇 Quina', cls:'badge-green', pts:acertos};
+    if(acertos >= 4) return {label:'🥈 Quadra', cls:'badge-blue', pts:acertos};
+    return {label:`❌ ${acertos} acertos`, cls:'badge-red', pts:acertos};
+  }
+}
+
+function renderMeusJogos(){
+  const el = document.getElementById('mj-content');
+  const stats = document.getElementById('mj-stats');
+  if(!el) return;
+
+  const filtData = document.getElementById('mj-filtro-data')?.value||'';
+  const filtLot  = document.getElementById('mj-filtro-lot')?.value||'';
+  const filtPrem = document.getElementById('mj-filtro-premio')?.value||'';
+
+  let jogos = [...getUserJogos()].reverse();
+  if(filtData) jogos = jogos.filter(j=>j.data===filtData);
+  if(filtLot)  jogos = jogos.filter(j=>j.lot===filtLot);
+
+  // Enrich with results
+  const enriched = jogos.map(j => {
+    const res = j.concurso ? _resultadosCache[j.lot+'_'+j.concurso] : null;
+    const acertos = calcAcertos(j.nums, res);
+    const premio = premioLabel(j.lot, acertos);
+    return {...j, res, acertos, premio};
+  });
+
+  // Apply prize filter
+  let filtered = enriched;
+  if(filtPrem === 'premiados')    filtered = enriched.filter(j=>j.acertos!==null&&j.acertos>=(j.lot==='lotofacil'?11:4));
+  if(filtPrem === 'nao_premiados') filtered = enriched.filter(j=>j.acertos!==null&&j.acertos<(j.lot==='lotofacil'?11:4));
+  if(filtPrem === 'sem_resultado') filtered = enriched.filter(j=>j.acertos===null);
+
+  // Stats
+  const total = enriched.length;
+  const comPremio = enriched.filter(j=>j.acertos!==null&&j.acertos>=(j.lot==='lotofacil'?11:4)).length;
+  const semRes = enriched.filter(j=>j.acertos===null).length;
+  stats.innerHTML = `
+    <div class="stat-card" style="flex:1;min-width:120px;text-align:center;">
+      <div class="stat-val">${total}</div><div class="stat-sub">Jogos salvos</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:120px;text-align:center;">
+      <div class="stat-val" style="color:#16a34a;">${comPremio}</div><div class="stat-sub">Com prêmio</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:120px;text-align:center;">
+      <div class="stat-val" style="color:#8aa0bc;">${semRes}</div><div class="stat-sub">Sem resultado</div>
+    </div>`;
+
+  if(!filtered.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🎮</div><p>Nenhum jogo encontrado</p></div>';
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  filtered.forEach(j=>{
+    if(!groups[j.data]) groups[j.data]=[];
+    groups[j.data].push(j);
+  });
+
+  el.innerHTML = Object.entries(groups).map(([date,items])=>`
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+        <span>📅 ${date} · ${items.length} jogo(s)</span>
+        <div style="display:flex;gap:5px;">
+          <button class="btn btn-outline btn-sm" onclick="copiarGrupoDataMJ('${date}')">📋</button>
+          <button class="btn btn-outline btn-sm" onclick="exportarPDFDataMJ('${date}')">📄</button>
+        </div>
+      </div>
+      ${items.map(j=>{
+        const bc=j.lot==='lotofacil'?'ball-loto':'ball-mega';
+        const ln=j.lot==='lotofacil'?'🔵 Lotofácil':'🟢 Mega-Sena';
+        const premBadge = j.premio ? `<span class="badge ${j.premio.cls}">${j.premio.label}</span>` : '<span class="badge badge-blue">⏳ Sem resultado</span>';
+        const concursoInfo = j.concurso ? `· Concurso ${j.concurso}` : '';
+        const acertosBar = j.acertos!==null ? `
+          <div style="margin-top:8px;">
+            <div style="font-size:11px;color:#4a6080;margin-bottom:4px;">Acertos: ${j.acertos} de ${j.nums.length}</div>
+            <div class="pbar"><div class="pbar-fill" style="width:${Math.round(j.acertos/j.nums.length*100)}%;background:${j.acertos>=(j.lot==='lotofacil'?11:4)?'#16a34a':'#ef4444'}"></div></div>
+          </div>` : '';
+        return `<div class="game-row">
+          <div class="game-row-header">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:var(--text3);">${ln} ${concursoInfo}</span>
+              ${premBadge}
+            </div>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-outline btn-sm" onclick="copiarJogoSalvo(${JSON.stringify(j.nums)},'${j.data}','${j.lot}')">📋</button>
+              <button class="btn btn-outline btn-sm" onclick="exportarPDFJogoUnico(${JSON.stringify(j.nums)},'${j.data}','${j.lot}')">📄</button>
+              <button class="btn btn-danger btn-sm" onclick="deletarJogoMJ(${j.id})">🗑️</button>
+            </div>
+          </div>
+          <div class="balls">
+            ${j.nums.map(n=>{
+              const acertou = j.res && j.res.includes(n);
+              return `<div class="ball ${bc} ball-sm" style="${acertou?'box-shadow:0 0 0 2px #16a34a,0 0 8px rgba(22,163,74,0.5);':'opacity:0.6'}">${String(n).padStart(2,'0')}</div>`;
+            }).join('')}
+          </div>
+          ${acertosBar}
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function deletarJogoMJ(id){
+  const jogos = getUserJogos().filter(j=>j.id!==id);
+  setUserJogos(jogos);
+  renderMeusJogosFilters();
+  renderMeusJogos();
+  showNotif('Jogo removido.','error');
+}
+
+async function limparMeusJogos(){
+  if(!confirm('Remover TODOS os jogos salvos? Esta ação não pode ser desfeita.')) return;
+  setUserJogos([]);
+  renderMeusJogosFilters();
+  renderMeusJogos();
+  showNotif('Todos os jogos removidos.','error');
+}
+
+function copiarMeusJogos(){
+  const filtData = document.getElementById('mj-filtro-data')?.value||'';
+  const filtLot  = document.getElementById('mj-filtro-lot')?.value||'';
+  let jogos = getUserJogos();
+  if(filtData) jogos = jogos.filter(j=>j.data===filtData);
+  if(filtLot)  jogos = jogos.filter(j=>j.lot===filtLot);
+  if(!jogos.length){showNotif('Nenhum jogo para copiar.','error');return;}
+  const lines = ['=== Área da Sorte — Meus Jogos ===',''];
+  jogos.forEach((j,i)=>{
+    const res = j.concurso?_resultadosCache[j.lot+'_'+j.concurso]:null;
+    const ac = calcAcertos(j.nums,res);
+    lines.push(`Jogo ${i+1} [${j.lot==='lotofacil'?'Lotofácil':'Mega-Sena'} · ${j.data}]: ${j.nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.nums.reduce((a,b)=>a+b,0)}${ac!==null?' | '+ac+' acertos':''}`);
+  });
+  navigator.clipboard.writeText(lines.join('
+')).then(()=>showNotif(jogos.length+' jogos copiados! 📋')).catch(()=>showNotif('Erro','error'));
+}
+
+function copiarGrupoDataMJ(date){
+  const jogos = getUserJogos().filter(j=>j.data===date);
+  const lines = [`=== Área da Sorte · ${date} ===`,''];
+  jogos.forEach((j,i)=>{
+    const res = j.concurso?_resultadosCache[j.lot+'_'+j.concurso]:null;
+    const ac = calcAcertos(j.nums,res);
+    lines.push(`Jogo ${i+1}: ${j.nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.nums.reduce((a,b)=>a+b,0)}${ac!==null?' | '+ac+' acertos':''}`);
+  });
+  navigator.clipboard.writeText(lines.join('
+')).then(()=>showNotif('Copiado! 📋')).catch(()=>showNotif('Erro','error'));
+}
+
+function exportarPDFMeusJogos(){
+  const filtData = document.getElementById('mj-filtro-data')?.value||'';
+  const filtLot  = document.getElementById('mj-filtro-lot')?.value||'';
+  let jogos = getUserJogos();
+  if(filtData) jogos = jogos.filter(j=>j.data===filtData);
+  if(filtLot)  jogos = jogos.filter(j=>j.lot===filtLot);
+  if(!jogos.length){showNotif('Nenhum jogo.','error');return;}
+  const enriched = jogos.map(j=>{
+    const res = j.concurso?_resultadosCache[j.lot+'_'+j.concurso]:null;
+    return {...j, acertos:calcAcertos(j.nums,res)};
+  });
+  buildPDFMeusJogos(enriched,'Área da Sorte — Meus Jogos',jogos.length+' jogo(s)');
+}
+
+function exportarPDFDataMJ(date){
+  const jogos = getUserJogos().filter(j=>j.data===date);
+  const enriched = jogos.map(j=>{
+    const res = j.concurso?_resultadosCache[j.lot+'_'+j.concurso]:null;
+    return {...j, acertos:calcAcertos(j.nums,res)};
+  });
+  buildPDFMeusJogos(enriched,`Área da Sorte · ${date}`,jogos.length+' jogo(s)');
+}
+
+function buildPDFMeusJogos(jogos,titulo,sub){
+  const data = new Date().toLocaleDateString('pt-BR');
+  const rows = jogos.map((j,i)=>{
+    const bc = j.lot==='lotofacil'?'#2563eb':'#16a34a';
+    const ln = j.lot==='lotofacil'?'Lotofácil':'Mega-Sena';
+    const acStr = j.acertos!==null?`<span style="color:${j.acertos>=(j.lot==='lotofacil'?11:4)?'#16a34a':'#ef4444'};font-weight:700;">${j.acertos} acertos</span>`:'—';
+    return `<tr style="border-bottom:1px solid #e8eef5">
+      <td style="padding:7px 6px;font-weight:600;color:#4a6080;font-size:12px;">Jogo ${i+1}</td>
+      <td style="padding:7px 6px;font-size:11px;color:#8aa0bc;">${ln}<br>${j.data||''}</td>
+      <td style="padding:7px 6px;">${j.nums.map(n=>`<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:${bc};color:#fff;border-radius:50%;font-size:9px;font-weight:700;margin:1px;">${String(n).padStart(2,'0')}</span>`).join('')}</td>
+      <td style="padding:7px 6px;font-size:12px;">Σ${j.nums.reduce((a,b)=>a+b,0)}</td>
+      <td style="padding:7px 6px;font-size:12px;">${acStr}</td>
+    </tr>`;
+  }).join('');
+  const htmlPDF = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo}</title>
+  <style>body{font-family:Arial,sans-serif;background:#f0f4f8;margin:0;padding:16px}.c{max-width:760px;margin:0 auto;background:#fff;border-radius:14px;padding:26px;box-shadow:0 4px 24px rgba(30,80,180,.10)}.h{display:flex;align-items:center;gap:12px;border-bottom:2px solid #e8eef5;padding-bottom:14px;margin-bottom:18px}.logo{width:40px;height:40px;background:linear-gradient(135deg,#1a56c4,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}h1{font-size:16px;color:#1a2a4a;margin:0 0 2px}.sub{font-size:11px;color:#4a6080}table{width:100%;border-collapse:collapse}thead tr{background:#f0f4f8}th{padding:8px 6px;text-align:left;font-size:9px;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px}.f{margin-top:16px;padding-top:12px;border-top:1px solid #e8eef5;font-size:10px;color:#8aa0bc;text-align:center}@media print{body{background:#fff;padding:0}.c{box-shadow:none;border-radius:0}}</style></head>
+  <body><div class="c"><div class="h"><div class="logo"><svg width="22" height="22" viewBox="0 0 28 28" fill="none"><path d="M14 3L16.5 10.5H24.5L18.2 15.1L20.7 22.6L14 18L7.3 22.6L9.8 15.1L3.5 10.5H11.5L14 3Z" fill="white"/></svg></div><div><h1>${titulo}</h1><div class="sub">${sub} · Exportado em ${data}</div></div></div>
+  <table><thead><tr><th>Nº</th><th>Loteria</th><th>Dezenas</th><th>Soma</th><th>Resultado</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="f">Área da Sorte · Sistema de Loterias · ${data}</div></div>
+  <scr`+'ipt>window.onload=()=>window.print()</scr'+'ipt></body></html>';
+  const b=new Blob([htmlPDF],{type:'text/html'}),url=URL.createObjectURL(b),w=window.open(url,'_blank');
+  if(!w){showNotif('Permita pop-ups para PDF.','error');return;}
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+  showNotif('PDF pronto! Use Ctrl+P para salvar 📄');
 }
 
 function loadMeuPlano(){
@@ -1685,6 +2227,52 @@ function adminReativarComPlano(u,plan){
   else users[u].expiresAt=null;
   UsersDB.saveUsers(users);
 }
+
+
+// ── ANTI-COPY / RIGHT-CLICK PROTECTION ──
+document.addEventListener('contextmenu', e => {
+  // Allow right-click inside inputs
+  if (!['INPUT','TEXTAREA'].includes(e.target.tagName)) {
+    e.preventDefault();
+  }
+});
+document.addEventListener('copy', e => {
+  // Allow copy inside inputs
+  if (!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) {
+    e.preventDefault();
+  }
+});
+document.addEventListener('cut', e => {
+  if (!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) {
+    e.preventDefault();
+  }
+});
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  const inInput = ['INPUT','TEXTAREA'].includes(tag);
+  // Block Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+S, Ctrl+P outside inputs
+  if (e.ctrlKey || e.metaKey) {
+    if (!inInput && ['c','x','u','s'].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+    }
+    // Always block Ctrl+P (print)
+    if (e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+    }
+  }
+  // Block F12 devtools
+  if (e.key === 'F12') {
+    e.preventDefault();
+  }
+});
+document.addEventListener('selectstart', e => {
+  if (!['INPUT','TEXTAREA'].includes(e.target.tagName)) {
+    e.preventDefault();
+  }
+});
+document.addEventListener('dragstart', e => {
+  e.preventDefault();
+});
 
 </script>
 </body>
