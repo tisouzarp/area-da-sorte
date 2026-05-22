@@ -1522,7 +1522,7 @@ function renderResultado(d,lot){
           </div>
           <div class="balls">${j.nums.map(n=>{
             const hit=balls.includes(n);
-            return`<div class="ball ${bc} ball-sm" style="${hit?'box-shadow:0 0 0 2px #16a34a;':'opacity:0.5;'}">${String(n).padStart(2,'00')}</div>`;
+            return`<div class="ball ${bc} ball-sm" style="${hit?'box-shadow:0 0 0 2px #16a34a;':'opacity:0.5;'}">${String(n).padStart(2,'0')}</div>`;
           }).join('')}</div>
           <div class="pbar" style="margin-top:8px;"><div class="pbar-fill" style="width:${Math.round(j.acertos/j.nums.length*100)}%;background:${premiado?'#16a34a':'#ef4444'}"></div></div>
         </div>`;
@@ -1540,7 +1540,7 @@ function renderResultado(d,lot){
       </div>
     </div>
     <div class="card-title">🎱 Números Sorteados</div>
-    <div class="balls">${balls.map(n=>`<div class="ball ball-result">${String(n).padStart(2,'00')}</div>`).join('')}</div>
+    <div class="balls">${balls.map(n=>`<div class="ball ball-result">${String(n).padStart(2,'0')}</div>`).join('')}</div>
     ${premHTML}
     ${meusHTML}
     ${prox>0?`<div class="info-box" style="margin-top:12px;">📈 Próximo concurso estimado em <strong>R$ ${prox.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></div>`:''}
