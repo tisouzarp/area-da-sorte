@@ -1091,7 +1091,13 @@ function enterApp(ud,paywallMode=false){
   if(ud.expiresAt&&ud.plan!=='admin'&&ud.plan!=='livre'){
     const exp=new Date(ud.expiresAt);const days=Math.ceil((exp-new Date())/(86400000));
     if(days<=7){expEl.textContent=days<=0?'VENCIDO':days===1?'Vence amanhã!':('Vence em '+days+' dias');expEl.className='u-expiry warning';
-      setTimeout(()=>{const a=document.getElementById('dash-alert');if(a)a.innerHTML=`<div class="warn-box" style="margin-bottom:14px;">⏰ Seu plano ${days<=0?'venceu':'vence em '+days+' dia(s)'}! Renove seu plano <button class="btn btn-outline btn-sm" style="margin-left:6px;" onclick="copyPix()">📋 Copiar</button></div>`;},400);
+      setTimeout(()=>{
+        const a=document.getElementById('dash-alert');
+        if(a){
+          const msg=days<=0?'Seu plano venceu!':'Seu plano vence em '+days+' dia(s)!';
+          a.innerHTML='<div class="warn-box" style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><span>⏰ '+msg+'</span><button class="btn btn-blue btn-sm" onclick="navTo(\'meuplano\')">💳 Pagar agora</button></div>';
+        }
+      },400);
     }else{expEl.textContent='Vence: '+exp.toLocaleDateString('pt-BR');expEl.className='u-expiry';}
   }else expEl.textContent='';
   if(ud.role==='admin'||ud.plan==='admin'){
