@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Área da Sorte — Sistema de Loterias</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Cpath d='M32 8L36.5 22H52L39.8 30.5L44.3 44.5L32 36L19.7 44.5L24.2 30.5L12 22H27.5L32 8Z' fill='white'/%3E%3Ccircle cx='50' cy='13' r='4.5' fill='white' opacity='0.85'/%3E%3Ccircle cx='14' cy='12' r='3' fill='white' opacity='0.7'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4f8;--bg2:#e8eef5;--bg3:#dce5ef;
+  --card:#ffffff;--card2:#f7fafd;
+  --border:rgba(30,90,180,0.10);--border2:rgba(30,90,180,0.18);
+  --text:#1a2a4a;--text2:#4a6080;--text3:#8aa0bc;
+  --blue:#2563eb;--blue2:#1a56c4;--blue-dim:rgba(37,99,235,0.10);
+  --green:#16a34a;--green-dim:rgba(22,163,74,0.10);
+  --yellow:#b45309;--yellow-dim:rgba(180,83,9,0.09);
+  --red:#dc2626;--red-dim:rgba(220,38,38,0.09);
+  --orange:#ea580c;--radius:14px;--shadow:0 4px 24px rgba(30,80,180,0.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px;}
+
+/* AUTH */
+#auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#dbeafe 0%,#f0f4f8 50%,#fef3c7 100%);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;}
+.auth-box{background:#fff;border:1px solid rgba(37,99,235,0.12);border-radius:20px;padding:36px 28px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(30,80,180,0.12);}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-logo .logo-icon{width:64px;height:64px;background:linear-gradient(135deg,#1a56c4,#2563eb);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;box-shadow:0 4px 16px rgba(37,99,235,0.3);}
+.auth-logo h1{font-size:21px;font-weight:700;color:#1a2a4a;}
+.auth-logo p{color:#4a6080;font-size:13px;margin-top:4px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:11px;font-weight:700;color:#4a6080;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.form-group input,.form-group select{width:100%;background:#f7fafd;border:1.5px solid rgba(37,99,235,0.15);border-radius:10px;padding:12px 14px;font-size:15px;color:#1a2a4a;font-family:'Sora',sans-serif;outline:none;transition:.2s;-webkit-appearance:none;}
+.form-group input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.10);}
+.btn-primary{width:100%;background:linear-gradient(135deg,#1a56c4,#2563eb);border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;transition:.2s;font-family:'Sora',sans-serif;-webkit-appearance:none;}
+.btn-primary:active{opacity:.85;transform:scale(.98);}
+.auth-extra{text-align:center;margin-top:16px;font-size:13px;color:#4a6080;}
+.auth-extra a{color:#2563eb;cursor:pointer;font-weight:600;}
+.auth-secure{text-align:center;margin-top:10px;font-size:12px;color:#8aa0bc;}
+.auth-error{background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,.25);border-radius:8px;padding:10px 14px;font-size:13px;color:#dc2626;margin-bottom:14px;display:none;}
+.auth-info{background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,.18);border-radius:8px;padding:12px 14px;font-size:13px;color:#1a56c4;margin-bottom:14px;line-height:1.6;display:none;}
+
+/* SUSPENDED */
+#suspended-screen{position:fixed;inset:0;background:linear-gradient(135deg,#dbeafe,#f0f4f8);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;}
+.suspended-box{background:#fff;border-radius:20px;padding:32px 24px;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow);}
+.suspended-icon{font-size:52px;margin-bottom:14px;}
+.suspended-box h2{font-size:20px;font-weight:700;color:#1a2a4a;margin-bottom:8px;}
+.suspended-box p{font-size:13px;color:#4a6080;line-height:1.7;margin-bottom:16px;}
+.pix-box{background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,.18);border-radius:12px;padding:14px;margin:14px 0;}
+.pix-key{font-size:16px;font-weight:700;color:#2563eb;}
+.plan-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+.plan-opt{border:2px solid var(--border2);border-radius:12px;padding:14px 10px;cursor:pointer;transition:.2s;background:#fff;}
+.plan-opt.selected{border-color:#2563eb;background:rgba(37,99,235,0.06);}
+.plan-opt .po-name{font-size:13px;font-weight:700;color:#1a2a4a;}
+.plan-opt .po-price{font-size:20px;font-weight:800;color:#2563eb;margin:4px 0;}
+.plan-opt .po-sub{font-size:11px;color:#8aa0bc;}
+
+/* LAYOUT */
+#app{display:none;height:100vh;overflow:hidden;}
+.sidebar{width:240px;background:#fff;border-right:1px solid var(--border);height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:100;box-shadow:2px 0 12px rgba(30,80,180,0.06);transition:transform .3s;}
+.sidebar-logo{padding:18px 20px;border-bottom:1px solid var(--border);}
+.logo-row{display:flex;align-items:center;gap:10px;}
+.logo-sq{width:34px;height:34px;background:linear-gradient(135deg,#1a56c4,#2563eb);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-name{font-size:15px;font-weight:700;color:#1a2a4a;}
+.sidebar-user{padding:12px 20px;border-bottom:1px solid var(--border);}
+.u-hello{font-size:11px;color:#8aa0bc;margin-bottom:2px;}
+.u-name{font-size:14px;font-weight:600;color:#1a2a4a;}
+.u-plan{display:inline-flex;align-items:center;gap:4px;margin-top:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;}
+.u-plan.mensal{background:rgba(37,99,235,0.10);color:#2563eb;}
+.u-plan.anual{background:rgba(22,163,74,0.10);color:#16a34a;}
+.u-plan.admin{background:rgba(180,83,9,0.10);color:#b45309;}
+.u-plan.trial{background:rgba(124,58,237,0.10);color:#7c3aed;}
+.u-plan.livre{background:rgba(124,58,237,0.10);color:#7c3aed;}
+.u-expiry{font-size:10px;color:#8aa0bc;margin-top:3px;}
+.u-expiry.warning{color:#dc2626;font-weight:600;}
+.nav-section{padding:12px 12px 4px;font-size:10px;font-weight:700;color:#8aa0bc;letter-spacing:1px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:1px 8px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:#4a6080;transition:.15s;}
+.nav-item:active{background:#e8eef5;}
+.nav-item.active{background:rgba(37,99,235,0.10);color:#1a56c4;border:1px solid rgba(37,99,235,0.15);}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;}
+.sidebar-footer{margin-top:auto;padding:12px 8px;border-top:1px solid var(--border);}
+.btn-logout{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:#8aa0bc;width:100%;background:none;border:none;font-family:'Sora',sans-serif;}
+.btn-logout:active{background:rgba(220,38,38,0.08);color:#dc2626;}
+
+/* MOBILE */
+.hamburger{display:none;position:fixed;top:10px;left:10px;z-index:200;width:42px;height:42px;background:#2563eb;border-radius:10px;border:none;cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:5px;box-shadow:0 2px 10px rgba(37,99,235,0.35);}
+.hamburger span{display:block;width:18px;height:2px;background:#fff;border-radius:2px;transition:.3s;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:99;}
+.overlay.show{display:block;}
+.mobile-topbar{display:none;position:fixed;top:0;left:0;right:0;height:54px;background:#fff;border-bottom:1px solid var(--border);z-index:90;align-items:center;padding:0 16px 0 62px;box-shadow:0 2px 8px rgba(30,80,180,0.06);}
+.mobile-topbar-title{font-size:15px;font-weight:700;color:#1a2a4a;}
+
+/* MAIN */
+.main{margin-left:240px;height:100vh;overflow-y:auto;background:var(--bg);}
+.page{display:none;padding:28px;min-height:100%;}
+.page.active{display:block;}
+.page-header{margin-bottom:22px;}
+.page-header h1{font-size:21px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px;}
+.page-header p{color:var(--text2);font-size:13px;margin-top:4px;}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 2px 8px rgba(30,80,180,0.05);}
+.card-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;}
+
+/* STATS */
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.stat-label{font-size:11px;color:var(--text2);margin-bottom:6px;}
+.stat-val{font-size:24px;font-weight:700;color:#1a56c4;}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+
+/* LOT TABS */
+.lot-tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+.lot-tab{padding:7px 16px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:#fff;white-space:nowrap;flex-shrink:0;transition:.2s;}
+.lot-tab.active{color:#fff;border-color:transparent;}
+.lot-tab[data-lot="lotofacil"].active{background:#2563eb;}
+.lot-tab[data-lot="megasena"].active{background:#16a34a;}
+
+/* BALLS */
+.balls{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0;}
+.ball{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.ball-loto{background:linear-gradient(135deg,#1a56c4,#2563eb);color:#fff;}
+.ball-mega{background:linear-gradient(135deg,#16a34a,#14532d);color:#fff;}
+.ball-result{background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;}
+.ball-sm{width:27px;height:27px;font-size:10px;}
+
+/* BUTTONS */
+.btn{padding:9px 16px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.2s;font-family:'Sora',sans-serif;display:inline-flex;align-items:center;gap:6px;-webkit-appearance:none;}
+.btn:active{transform:scale(.97);}
+.btn-blue{background:linear-gradient(135deg,#1a56c4,#2563eb);color:#fff;}
+.btn-outline{background:#fff;border:1px solid var(--border2);color:var(--text2);}
+.btn-green{background:var(--green-dim);border:1px solid rgba(22,163,74,.25);color:#16a34a;}
+.btn-sm{padding:6px 11px;font-size:11px;}
+.btn-danger{background:var(--red-dim);border:1px solid rgba(220,38,38,.2);color:var(--red);}
+
+/* FORM CONTROLS */
+.form-ctrl{width:100%;background:#f7fafd;border:1.5px solid rgba(37,99,235,0.15);border-radius:9px;padding:9px 12px;font-size:14px;color:var(--text);font-family:'Sora',sans-serif;outline:none;-webkit-appearance:none;}
+.form-ctrl:focus{border-color:#2563eb;}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(37,99,235,0.07);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-row label{font-size:13px;color:var(--text2);}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0;}
+.toggle input{display:none;}
+.toggle-track{position:absolute;inset:0;background:#dce5ef;border-radius:12px;cursor:pointer;transition:.2s;}
+.toggle input:checked+.toggle-track{background:#2563eb;}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.toggle input:checked~.toggle-thumb{left:21px;}
+
+/* SLIDER */
+.slider-wrap{margin:10px 0;}
+.slider-label{font-size:12px;color:var(--text2);display:flex;justify-content:space-between;margin-bottom:6px;}
+input[type=range]{width:100%;accent-color:#2563eb;cursor:pointer;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{text-align:left;padding:9px 10px;font-size:10px;font-weight:700;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(37,99,235,0.10);}
+.data-table td{padding:9px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid rgba(37,99,235,0.06);}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(37,99,235,0.02);}
+
+/* BADGES */
+.badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+.badge-blue{background:rgba(37,99,235,0.10);color:#1a56c4;}
+.badge-green{background:var(--green-dim);color:var(--green);}
+.badge-yellow{background:var(--yellow-dim);color:var(--yellow);}
+.badge-red{background:var(--red-dim);color:var(--red);}
+.badge-purple{background:rgba(124,58,237,0.10);color:#7c3aed;}
+
+/* BOXES */
+.info-box{background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.18);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text2);line-height:1.6;}
+.info-box strong{color:var(--text);}
+.warn-box{background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.22);border-radius:10px;padding:10px 14px;font-size:12px;color:#b45309;}
+.success-box{background:var(--green-dim);border:1px solid rgba(22,163,74,.25);border-radius:10px;padding:12px 14px;font-size:13px;color:#16a34a;}
+
+/* GAME ROW */
+.game-row{background:#f7fafd;border:1px solid rgba(37,99,235,0.10);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+.game-row-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
+.game-meta{font-size:11px;color:var(--text3);}
+
+/* BAR CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:2px;height:70px;}
+.bar-item{flex:1;background:#2563eb;border-radius:2px 2px 0 0;min-height:3px;transition:.3s;}
+
+/* DASHBOARD */
+.dash-tools{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.tool-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:.2s;box-shadow:0 2px 8px rgba(30,80,180,0.05);}
+.tool-card:active{transform:scale(.98);background:#f7fafd;}
+.tool-card .tc-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:10px;}
+.tool-card h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.tool-card p{font-size:11px;color:var(--text2);}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:var(--text3);}
+.spinner{width:26px;height:26px;border:2px solid #dce5ef;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.5;}
+
+/* HEATMAP */
+.hm-cell{border-radius:7px;padding:6px 3px;text-align:center;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1.4;}
+
+/* NOTIFICATION */
+.notif{position:fixed;top:16px;right:16px;background:#fff;border:1px solid rgba(37,99,235,0.2);border-radius:12px;padding:12px 16px;font-size:13px;z-index:9999;transform:translateY(-120px);opacity:0;transition:.35s;max-width:300px;box-shadow:0 4px 20px rgba(30,80,180,0.15);}
+.notif.show{transform:translateY(0);opacity:1;}
+.notif.success{border-color:rgba(22,163,74,.3);color:#16a34a;}
+.notif.error{border-color:rgba(220,38,38,.3);color:#dc2626;}
+
+/* PBAR */
+.pbar{height:6px;background:#dce5ef;border-radius:3px;overflow:hidden;}
+.pbar-fill{height:100%;background:linear-gradient(90deg,#1a56c4,#2563eb);border-radius:3px;transition:width .5s;}
+
+/* ADMIN */
+.admin-stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.admin-stat .as-val{font-size:28px;font-weight:800;color:#1a56c4;}
+.admin-stat .as-label{font-size:11px;color:#8aa0bc;margin-top:4px;}
+.user-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(37,99,235,0.07);flex-wrap:wrap;}
+.user-row:last-child{border-bottom:none;}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1a56c4,#2563eb);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.user-info{flex:1;min-width:120px;}
+.user-name-text{font-size:13px;font-weight:600;color:#1a2a4a;}
+.user-meta-text{font-size:11px;color:#8aa0bc;margin-top:2px;}
+.user-actions{display:flex;gap:5px;flex-wrap:wrap;}
+
+/* COMBO TABS */
+.combo-tabs{display:flex;gap:5px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.combo-tab{padding:6px 13px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(37,99,235,0.15);color:var(--text2);background:#fff;white-space:nowrap;flex-shrink:0;}
+.combo-tab.active{background:rgba(37,99,235,0.10);color:#1a56c4;border-color:rgba(37,99,235,0.25);}
+/* PIX / PLAN */
+.plan-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.plan-opt{border:2px solid var(--border2);border-radius:14px;padding:18px 14px;cursor:pointer;transition:.2s;background:#fff;text-align:center;}
+.plan-opt:active{transform:scale(.97);}
+.plan-opt.selected{border-color:#2563eb;background:rgba(37,99,235,0.06);box-shadow:0 0 0 3px rgba(37,99,235,0.10);}
+.plan-opt .po-name{font-size:14px;font-weight:700;color:#1a2a4a;}
+.plan-opt .po-price{font-size:26px;font-weight:800;color:#2563eb;margin:6px 0;}
+.plan-opt .po-sub{font-size:11px;color:#8aa0bc;}
+
+/* MOBILE RESPONSIVE */
+@media(max-width:768px){
+  .hamburger{display:flex;}
+  .mobile-topbar{display:flex;}
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,0.15);}
+  .main{margin-left:0;padding-top:54px;}
+  .page{padding:12px 12px 80px;}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr;}
+  .dash-tools{grid-template-columns:1fr 1fr;}
+  .page-header h1{font-size:17px;}
+  .card{padding:13px;}
+  .stat-val{font-size:20px;}
+  .ball{width:28px;height:28px;font-size:10px;}
+  .ball-sm{width:24px;height:24px;font-size:9px;}
+  .balls{gap:3px;}
+  .btn{padding:8px 13px;font-size:12px;}
+  .btn-sm{padding:5px 9px;font-size:11px;}
+  .data-table{font-size:11px;}
+  .data-table th,.data-table td{padding:7px 6px;}
+  .notif{top:auto;bottom:16px;right:10px;left:10px;max-width:none;}
+  .game-row{padding:10px 11px;}
+  .tool-card{padding:14px;}
+  .plan-opts{grid-template-columns:1fr 1fr;}
+  .auth-box{padding:26px 18px;}
+  .user-row{gap:8px;}
+  .user-actions{margin-top:4px;width:100%;}
+}
+@media(max-width:380px){
+  .dash-tools{grid-template-columns:1fr;}
+  .ball-sm{width:22px;height:22px;font-size:8px;}
+  .grid4{grid-template-columns:1fr 1fr;}
+}
+
+/* ── ANTI-COPY / ANTI-SELECT ── */
+body, .main, .sidebar, .page {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/* Allow typing in inputs/textareas */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+img { pointer-events: none; -webkit-user-drag: none; }
+
+
+/* ── CONTENT PROTECTION ── */
+body {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+/* Allow selection only in input fields */
+input, textarea {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  user-select: text !important;
+}
+/* Hide print content */
+@media print {
+  body { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="notif" id="notif"></div>
+
+<!-- AUTH -->
+<div id="auth-screen">
+<div class="auth-box">
+  <div class="auth-logo">
+    <div class="logo-icon">
+      <svg width="36" height="36" viewBox="0 0 38 38" fill="none">
+        <path d="M19 4L21.8 14.2H32.5L23.8 20.6L26.6 30.8L19 24.4L11.4 30.8L14.2 20.6L5.5 14.2H16.2L19 4Z" fill="white" stroke="white" stroke-width="0.5"/>
+        <circle cx="29" cy="8" r="2.8" fill="white" opacity="0.85"/>
+        <circle cx="9" cy="7" r="1.9" fill="white" opacity="0.7"/>
+      </svg>
+    </div>
+    <h1>Área do Cliente</h1>
+    <p>Faça login para acessar suas ferramentas</p>
+  </div>
+  <div class="auth-error" id="auth-error"></div>
+  <div class="auth-info" id="auth-info"></div>
+  <div id="login-form">
+    <div class="form-group"><label>E-mail ou usuário</label><input type="text" id="l-user" placeholder="email ou usuário" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn-primary" onclick="doLogin()">→ Entrar</button>
+    <div class="auth-extra" style="margin-top:16px;">Não tem conta? <a onclick="switchAuth('register')">Cadastre-se</a></div>
+    <div class="auth-secure">🔒 Seus dados estão protegidos</div>
+  </div>
+  <div id="register-form" style="display:none">
+    <div class="form-group"><label>Nome completo</label><input type="text" id="r-name" placeholder="Ex: João Silva" autocomplete="name"></div>
+    <div class="form-group"><label>E-mail</label><input type="email" id="r-email" placeholder="seu@email.com" autocomplete="email" autocapitalize="none" autocorrect="off"></div>
+    <div class="form-group"><label>Usuário</label><input type="text" id="r-user" placeholder="Ex: joao123 (sem espaços)" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="r-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+    <button class="btn-primary" onclick="doRegister()">Criar conta</button>
+    <div class="auth-extra" style="margin-top:16px;">Já tem conta? <a onclick="switchAuth('login')">Entrar</a></div>
+    <div class="auth-secure">🔒 Seus dados estão protegidos</div>
+  </div>
+</div>
+</div>
+
+<!-- SUSPENDED -->
+<div id="suspended-screen">
+<div class="suspended-box">
+  <div class="suspended-icon">🔒</div>
+  <h2>Acesso Suspenso</h2>
+  <p id="suspended-msg">Seu plano venceu. Realize o pagamento via PIX para reativar.</p>
+  <div class="pix-box">
+    <div style="font-size:12px;color:#4a6080;margin-bottom:6px;">Chave PIX</div>
+    <div class="pix-key">2264bb61-2de7-4aa2-af8c-3c71ae28077c</div>
+    <div style="font-size:11px;color:#8aa0bc;margin-top:6px;">Após o pagamento, aguarde a confirmação do administrador.</div>
+  </div>
+  <div style="font-size:13px;font-weight:600;color:#1a2a4a;margin-bottom:10px;">Escolha seu plano:</div>
+  <div class="plan-opts">
+    <div class="plan-opt selected" id="plan-mensal" onclick="selectPlan('mensal')">
+      <div class="po-name">Mensal</div>
+      <div class="po-price">R$29,90</div>
+      <div class="po-sub">por mês</div>
+    </div>
+    <div class="plan-opt" id="plan-anual" onclick="selectPlan('anual')">
+      <div class="po-name">Anual</div>
+      <div class="po-price">R$197</div>
+      <div class="po-sub">R$16,42/mês · 34% off</div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="copyPix()">📋 Copiar Chave PIX</button>
+  <div style="margin-top:12px;"><a onclick="doLogout()" style="font-size:13px;color:#8aa0bc;cursor:pointer;">← Sair</a></div>
+</div>
+</div>
+
+<!-- MOBILE -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+  <span id="hb1"></span><span id="hb2"></span><span id="hb3"></span>
+</button>
+<div class="mobile-topbar">
+  <div class="mobile-topbar-title" id="mobile-page-title">Área da Sorte</div>
+</div>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- APP -->
+<div id="app">
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-sq">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2L13.2 8.8H20.5L14.6 12.9L16.8 19.7L11 15.6L5.2 19.7L7.4 12.9L1.5 8.8H8.8L11 2Z" fill="white"/>
+          <circle cx="18" cy="4.5" r="1.6" fill="white" opacity="0.8"/>
+          <circle cx="4" cy="4" r="1.1" fill="white" opacity="0.65"/>
+        </svg>
+      </div>
+      <div class="logo-name">Área da Sorte</div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="u-hello">Olá,</div>
+    <div class="u-name" id="sb-name">—</div>
+    <div class="u-plan mensal" id="sb-plan">—</div>
+    <div class="u-expiry" id="sb-expiry"></div>
+  </div>
+  <div class="nav-section">Menu</div>
+  <div class="nav-item active" onclick="navTo('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Início
+  </div>
+  <div class="nav-item" onclick="navTo('desdobramentos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Desdobramentos
+  </div>
+  <div class="nav-item" onclick="navTo('gerador')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Gerador
+  </div>
+  <div class="nav-item" onclick="navTo('inteligencia')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Inteligência
+  </div>
+  <div class="nav-item" onclick="navTo('combinacoes')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Combinações
+  </div>
+  <div class="nav-item" onclick="navTo('resultados')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Resultados
+  </div>
+  <div class="nav-item" id="nav-meusjogos" onclick="navTo('meusjogos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Meus Jogos
+  </div>
+  <div class="nav-item" id="nav-meusjogos" onclick="navTo('meusjogos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg>Meus Jogos
+  </div>
+  <div class="nav-item" id="nav-meuplano" onclick="navTo('meuplano')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Meu Plano
+  </div>
+  <div class="nav-item" id="nav-admin" style="display:none;" onclick="navTo('admin')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin
+  </div>
+  <div class="sidebar-footer">
+    <button class="btn-logout" onclick="doLogout()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair da conta
+    </button>
+  </div>
+</div>
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header"><h1>Olá, <span id="ph-name">—</span> 👋</h1><p>Escolha uma ferramenta para começar</p></div>
+  <div id="dash-alert"></div>
+  <div id="dash-last-result" style="margin-bottom:16px;"></div>
+  <div class="dash-tools">
+    <div class="tool-card" onclick="navTo('desdobramentos')"><div class="tc-icon" style="background:rgba(37,99,235,.10)">📊</div><h3>Desdobramentos</h3><p>Fechamentos otimizados</p></div>
+    <div class="tool-card" onclick="navTo('gerador')"><div class="tc-icon" style="background:rgba(37,99,235,.10)">⚡</div><h3>Gerador IA</h3><p>Jogos com análise estatística</p></div>
+    <div class="tool-card" onclick="navTo('inteligencia')"><div class="tc-icon" style="background:rgba(22,163,74,.10)">🧠</div><h3>Inteligência</h3><p>Frequências e tendências</p></div>
+    <div class="tool-card" onclick="navTo('combinacoes')"><div class="tc-icon" style="background:rgba(234,179,8,.10)">🔗</div><h3>Combinações</h3><p>Pares e padrões</p></div>
+  </div>
+</div>
+
+<!-- DESDOBRAMENTOS -->
+<div class="page" id="page-desdobramentos">
+  <div class="page-header"><h1>📊 Desdobramentos</h1><p>Garanta premiações mínimas com fechamentos matemáticos</p></div>
+  <div class="lot-tabs">
+    <div class="lot-tab active" data-lot="lotofacil" onclick="setLotTab(this,'desdobramentos')">🔵 Lotofácil</div>
+    <div class="lot-tab" data-lot="megasena" onclick="setLotTab(this,'desdobramentos')">🟢 Mega-Sena</div>
+  </div>
+  <div class="info-box" style="margin-bottom:16px;"><strong>Desdobramentos</strong> são todas as combinações possíveis entre os números escolhidos. <strong>Fechamentos</strong> eliminam jogos com premiações repetidas, mantendo a garantia mínima.</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title" id="desdobramento-config-title">🔵 Lotofácil — Configuração</div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Garantia mínima de acertos</label>
+        <select class="form-ctrl" id="garantia-sel" onchange="updateDesdobramento()"><option value="">Selecione...</option></select>
+      </div>
+      <div id="dezenas-picker" style="display:none;">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:8px;">Escolha as dezenas</label>
+        <div id="dezenas-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;"></div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="limparDezenas()">Limpar</button>
+          <span id="dezenas-count" style="font-size:11px;color:var(--text2);">0 selecionadas</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="desdobramento-result"><div class="empty-state"><div class="empty-icon">📋</div><p>Selecione a garantia desejada</p></div></div>
+  </div>
+</div>
+
+<!-- GERADOR -->
+<div class="page" id="page-gerador">
+  <div class="page-header"><h1>⚡ Gerador Inteligente</h1><p>Jogos otimizados com IA e estatística avançada</p></div>
+  <div class="lot-tabs">
+    <div class="lot-tab active" data-lot="lotofacil" onclick="setLotTab(this,'gerador')">🔵 Lotofácil</div>
+    <div class="lot-tab" data-lot="megasena" onclick="setLotTab(this,'gerador')">🟢 Mega-Sena</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">⚙️ Configuração</div>
+      <div class="slider-wrap">
+        <div class="slider-label"><span>Quantidade de jogos</span><span id="qtd-label">5</span></div>
+        <input type="range" min="1" max="20" value="5" id="qtd-jogos" oninput="document.getElementById('qtd-label').textContent=this.value">
+      </div>
+      <div style="margin:12px 0;">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Dezenas por jogo</label>
+        <select class="form-ctrl" id="dez-jogo"></select>
+      </div>
+      <div class="card-title" style="margin-top:14px;">🎯 Filtros IA</div>
+      <div class="toggle-row"><label>Priorizar dezenas quentes</label><label class="toggle"><input type="checkbox" checked id="f-quentes"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+      <div class="toggle-row"><label>Incluir dezenas frias</label><label class="toggle"><input type="checkbox" checked id="f-frias"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+      <div class="slider-wrap" style="margin-top:10px;">
+        <div class="slider-label"><span>Qtd. dezenas frias</span><span id="frias-label">3</span></div>
+        <input type="range" min="1" max="6" value="3" id="qtd-frias" oninput="document.getElementById('frias-label').textContent=this.value">
+      </div>
+      <div class="toggle-row"><label>Equilibrar par/ímpar</label><label class="toggle"><input type="checkbox" checked id="f-paridade"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+      <div class="toggle-row"><label>Evitar sequências longas</label><label class="toggle"><input type="checkbox" checked id="f-seq"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+      <div class="slider-wrap" style="margin-top:10px;">
+        <div class="slider-label"><span>Máx. consecutivos</span><span id="consec-label">3</span></div>
+        <input type="range" min="2" max="5" value="3" id="qtd-consec" oninput="document.getElementById('consec-label').textContent=this.value">
+      </div>
+      <div class="toggle-row"><label>Faixa de soma ideal</label><label class="toggle"><input type="checkbox" checked id="f-soma"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+      <div class="toggle-row"><label>Evitar pares raros</label><label class="toggle"><input type="checkbox" checked id="f-pares"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+      <div class="toggle-row"><label>Primos balanceados</label><label class="toggle"><input type="checkbox" checked id="f-primos"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+      <div style="margin-top:14px;"><button class="btn btn-blue" style="width:100%;justify-content:center;" onclick="gerarJogos()">⚡ Gerar Jogos com IA</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎮 Jogos Gerados</div>
+      <div id="jogos-gerados"><div class="empty-state"><div class="empty-icon">⚡</div><p>Nenhum jogo gerado ainda</p></div></div>
+      <div id="jogos-salvos-section" style="margin-top:18px;display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div class="card-title" style="margin-bottom:0;">💾 Jogos Salvos</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <select class="form-ctrl" id="filtro-data" onchange="loadJogosSalvos()" style="width:auto;padding:5px 9px;font-size:11px;"></select>
+            <select class="form-ctrl" id="filtro-lot" onchange="loadJogosSalvos()" style="width:auto;padding:5px 9px;font-size:11px;"><option value="">Todos</option><option value="lotofacil">Lotofácil</option><option value="megasena">Mega-Sena</option></select>
+            <button class="btn btn-outline btn-sm" onclick="copiarJogosSalvos()">📋</button>
+            <button class="btn btn-outline btn-sm" onclick="exportarPDFSalvos()">📄</button>
+          </div>
+        </div>
+        <div id="jogos-salvos-list"></div>
+        <div id="jogos-salvos-empty" style="display:none;" class="empty-state"><div class="empty-icon">📭</div><p>Nenhum jogo encontrado</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INTELIGÊNCIA -->
+<div class="page" id="page-inteligencia">
+  <div class="page-header"><h1>🧠 Inteligência</h1><p id="intel-subtitle">Análise estatística dos concursos</p></div>
+  <div class="lot-tabs">
+    <div class="lot-tab active" data-lot="lotofacil" onclick="setLotTab(this,'inteligencia')">🔵 Lotofácil</div>
+    <div class="lot-tab" data-lot="megasena" onclick="setLotTab(this,'inteligencia')">🟢 Mega-Sena</div>
+  </div>
+  <div id="intel-loading" class="loading"><div class="spinner"></div><p>Carregando dados...</p></div>
+  <div id="intel-content" style="display:none;">
+    <div class="grid4" style="margin-bottom:16px;" id="intel-stats"></div>
+    <div class="grid2" style="margin-bottom:14px;">
+      <div class="card"><div class="card-title">📊 Frequência das Dezenas</div><div id="freq-chart"></div></div>
+      <div class="card"><div class="card-title">📈 Top 10 Mais Frequentes</div><table class="data-table" id="top10-freq"></table></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="card-title">📉 Top 10 Menos Frequentes</div><table class="data-table" id="top10-menos"></table></div>
+      <div class="card"><div class="card-title">🧊 Top 10 Maior Atraso</div><table class="data-table" id="top10-atraso"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMBINAÇÕES -->
+<div class="page" id="page-combinacoes">
+  <div class="page-header"><h1>🔗 Combinações</h1><p id="combo-subtitle">Correlações e padrões</p></div>
+  <div class="lot-tabs">
+    <div class="lot-tab active" data-lot="lotofacil" onclick="setLotTab(this,'combinacoes')">🔵 Lotofácil</div>
+    <div class="lot-tab" data-lot="megasena" onclick="setLotTab(this,'combinacoes')">🟢 Mega-Sena</div>
+  </div>
+  <div id="combo-loading" class="loading"><div class="spinner"></div><p>Carregando...</p></div>
+  <div id="combo-content" style="display:none;">
+    <div class="combo-tabs">
+      <div class="combo-tab active" onclick="setComboTab('pares',this)">🔗 Pares</div>
+      <div class="combo-tab" onclick="setComboTab('sequencias',this)">→ Sequências</div>
+      <div class="combo-tab" onclick="setComboTab('repeticoes',this)">🔄 Repetições</div>
+      <div class="combo-tab" onclick="setComboTab('heatmap',this)">🗺️ Heatmap</div>
+    </div>
+    <div id="combo-pares"><div class="grid2"><div class="card"><div class="card-title">🔗 Top 15 Pares Frequentes</div><table class="data-table" id="pares-freq"></table></div><div class="card"><div class="card-title">🚫 Top 10 Pares Raros</div><table class="data-table" id="pares-raros"></table></div></div></div>
+    <div id="combo-sequencias" style="display:none;"><div class="card"><div class="card-title">→ Sequências Consecutivas</div><div id="seq-content"></div></div></div>
+    <div id="combo-repeticoes" style="display:none;"><div class="card"><div class="card-title">🔄 Repetições do Último Concurso</div><div id="rep-content"></div></div></div>
+    <div id="combo-heatmap" style="display:none;"><div class="card"><div class="card-title">🗺️ Heatmap de Frequência</div><div id="hm-content"></div></div></div>
+  </div>
+</div>
+
+<!-- RESULTADOS -->
+<div class="page" id="page-resultados">
+  <div class="page-header"><h1>🏆 Resultados</h1><p>Resultados oficiais das loterias</p></div>
+  <div class="lot-tabs">
+    <div class="lot-tab active" data-lot="lotofacil" onclick="setLotTab(this,'resultados')">🔵 Lotofácil</div>
+    <div class="lot-tab" data-lot="megasena" onclick="setLotTab(this,'resultados')">🟢 Mega-Sena</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="btn btn-outline btn-sm" onclick="navResultado(-1)">◀</button>
+    <button class="btn btn-outline btn-sm" onclick="navResultado(1)">▶</button>
+    <button class="btn btn-outline btn-sm" onclick="loadUltimoResultado()">Último</button>
+    <input type="number" class="form-ctrl" id="busca-concurso" placeholder="Nº concurso" style="width:120px;" oninput="buscarConcurso()">
+  </div>
+  <div id="resultado-loading" class="loading"><div class="spinner"></div><p>Carregando resultado...</p></div>
+  <div id="resultado-content" style="display:none;"></div>
+</div>
+
+<!-- MEUS JOGOS -->
+<div class="page" id="page-meusjogos">
+  <div class="page-header">
+    <h1>🎮 Meus Jogos</h1>
+    <p>Todos os seus jogos salvos em um só lugar</p>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">📅 Data</label>
+        <select class="form-ctrl" id="mj-filtro-data" onchange="loadMeusJogos()" style="font-size:13px;"></select>
+      </div>
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🎱 Loteria</label>
+        <select class="form-ctrl" id="mj-filtro-lot" onchange="loadMeusJogos()" style="font-size:13px;">
+          <option value="">Todas</option>
+          <option value="lotofacil">Lotofácil</option>
+          <option value="megasena">Mega-Sena</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🏆 Status</label>
+        <select class="form-ctrl" id="mj-filtro-status" onchange="loadMeusJogos()" style="font-size:13px;">
+          <option value="">Todos</option>
+          <option value="premiado">⭐ Premiados</option>
+          <option value="normal">Não premiados</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🔍 Buscar números</label>
+        <input type="text" class="form-ctrl" id="mj-filtro-nums" placeholder="Ex: 07 11 20" oninput="loadMeusJogos()" style="font-size:13px;">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="mjLimparFiltros()">🔄 Limpar filtros</button>
+      <span id="mj-count" style="font-size:12px;color:var(--text3);margin-left:4px;"></span>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="mjCopiarTodos()">📋 Copiar seleção</button>
+        <button class="btn btn-blue btn-sm" onclick="mjExportarPDF()">📄 PDF seleção</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTA -->
+  <div id="mj-loading" class="loading" style="display:none;"><div class="spinner"></div><p>Carregando jogos...</p></div>
+  <div id="mj-lista"></div>
+  <div id="mj-empty" class="empty-state" style="display:none;">
+    <div class="empty-icon">🎮</div>
+    <p>Nenhum jogo encontrado</p>
+    <p style="font-size:12px;margin-top:6px;">Gere jogos no Gerador e salve-os aqui</p>
+    <button class="btn btn-blue" style="margin-top:14px;" onclick="navTo('gerador')">⚡ Ir para o Gerador</button>
+  </div>
+</div>
+
+<!-- MEUS JOGOS -->
+<div class="page" id="page-meusjogos">
+  <div class="page-header"><h1>🎮 Meus Jogos</h1><p>Todos os seus jogos salvos em um só lugar</p></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+    <select class="form-ctrl" id="mj-filtro-data" onchange="renderMeusJogos()" style="width:auto;padding:7px 12px;font-size:13px;"></select>
+    <select class="form-ctrl" id="mj-filtro-lot" onchange="renderMeusJogos()" style="width:auto;padding:7px 12px;font-size:13px;">
+      <option value="">🎲 Todos os jogos</option>
+      <option value="lotofacil">🔵 Lotofácil</option>
+      <option value="megasena">🟢 Mega-Sena</option>
+    </select>
+    <select class="form-ctrl" id="mj-filtro-premio" onchange="renderMeusJogos()" style="width:auto;padding:7px 12px;font-size:13px;">
+      <option value="">🏆 Todos os resultados</option>
+      <option value="premiados">✅ Com acertos (11+)</option>
+      <option value="nao_premiados">❌ Sem prêmio</option>
+      <option value="sem_resultado">⏳ Sem resultado ainda</option>
+    </select>
+    <button class="btn btn-outline btn-sm" onclick="copiarMeusJogos()">📋 Copiar</button>
+    <button class="btn btn-outline btn-sm" onclick="exportarPDFMeusJogos()">📄 PDF</button>
+    <button class="btn btn-danger btn-sm" onclick="limparMeusJogos()">🗑️ Limpar tudo</button>
+  </div>
+  <div id="mj-stats" style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;"></div>
+  <div id="mj-content"></div>
+</div>
+
+<!-- MEU PLANO -->
+<div class="page" id="page-meuplano">
+  <div class="page-header"><h1>💳 Meu Plano</h1><p>Gerencie sua assinatura</p></div>
+  <div id="meuplano-content"></div>
+</div>
+
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <div class="page-header"><h1>👑 Painel Admin</h1><p>Gerencie usuários e acessos</p></div>
+  <div id="jbin-setup-card" style="display:none;margin-bottom:16px;">
+    <div class="card" style="border:2px solid rgba(37,99,235,0.3);background:rgba(37,99,235,0.04);">
+      <div class="card-title">🔧 Configurar Banco de Dados Central (JSONBin.io)</div>
+      <p style="font-size:13px;color:#4a6080;margin-bottom:12px;line-height:1.6;">Para que os cadastros funcionem em qualquer dispositivo, configure o JSONBin.io gratuito:<br>1) Acesse <strong>jsonbin.io</strong> e crie uma conta gratuita<br>2) Vá em <strong>API Keys → Master Key</strong> e copie a chave<br>3) Cole abaixo e clique em Conectar</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" id="jbin-key-input" class="form-ctrl" placeholder="$2a$10$... (Master Key do JSONBin)" style="flex:1;min-width:200px;">
+        <button class="btn btn-blue" onclick="setupJSONBin()">🔌 Conectar</button>
+      </div>
+      <div id="jbin-status" style="font-size:12px;margin-top:8px;color:#8aa0bc;"></div>
+    </div>
+  </div>
+  <div class="grid4" style="margin-bottom:18px;">
+    <div class="admin-stat"><div class="as-val" id="as-total">—</div><div class="as-label">Total Usuários</div></div>
+    <div class="admin-stat"><div class="as-val" id="as-ativos" style="color:#16a34a;">—</div><div class="as-label">Ativos</div></div>
+    <div class="admin-stat"><div class="as-val" id="as-suspensos" style="color:#dc2626;">—</div><div class="as-label">Suspensos</div></div>
+    <div class="admin-stat"><div class="as-val" id="as-receita" style="color:#b45309;">—</div><div class="as-label">Receita/mês</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">➕ Criar Usuário</div>
+      <div class="form-group"><label>Nome completo</label><input type="text" class="form-ctrl" id="adm-name" placeholder="Nome do usuário"></div>
+      <div class="form-group"><label>E-mail ou usuário de login</label><input type="text" class="form-ctrl" id="adm-user" placeholder="email@exemplo.com ou joao123" autocapitalize="none" autocorrect="off"></div>
+      <div class="form-group"><label>Senha</label><input type="password" class="form-ctrl" id="adm-pass" placeholder="Mínimo 4 caracteres"><div style="font-size:10px;color:#8aa0bc;margin-top:4px;">💡 O usuário fará login com o e-mail/usuário acima + esta senha</div></div>
+      <div class="form-group"><label>Plano</label>
+        <select class="form-ctrl" id="adm-plan">
+          <option value="livre">Livre (sem expirar)</option>
+          <option value="mensal" selected>Mensal (30 dias)</option>
+          <option value="anual">Anual (365 dias)</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <button class="btn btn-blue" onclick="adminCriarUsuario()" style="width:100%;justify-content:center;">➕ Criar Usuário</button>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Usuários Cadastrados</div>
+      <input type="text" class="form-ctrl" id="adm-search" placeholder="Buscar por nome ou usuário..." oninput="renderAdminUsers()" style="margin-bottom:12px;">
+      <div style="font-size:11px;color:#8aa0bc;margin-bottom:10px;" id="adm-user-count"></div>
+      <div id="adm-users-list" style="max-height:420px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+<script>
+// ── CONTENT PROTECTION ──
+(function(){
+  // Disable right-click context menu
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+    return false;
+  }, true);
+
+  // Disable copy/cut
+  document.addEventListener('copy', function(e){
+    // Allow copy in inputs/textareas for usability
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    e.preventDefault();
+    return false;
+  }, true);
+  document.addEventListener('cut', function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    e.preventDefault();
+    return false;
+  }, true);
+
+  // Disable keyboard shortcuts for copy/save/print/view-source
+  document.addEventListener('keydown', function(e){
+    const ctrl = e.ctrlKey || e.metaKey;
+    if(!ctrl) return;
+    const blocked = ['c','x','u','s','p','a'];
+    if(blocked.includes(e.key.toLowerCase())){
+      // Allow Ctrl+C in inputs
+      if((e.key==='c'||e.key==='x'||e.key==='a') &&
+         (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')) return;
+      e.preventDefault();
+      return false;
+    }
+    // Block F12, Ctrl+Shift+I, Ctrl+Shift+J (devtools)
+    if(e.key==='F12'){e.preventDefault();return false;}
+    if(ctrl && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())){
+      e.preventDefault();return false;
+    }
+  }, true);
+
+  // Disable drag
+  document.addEventListener('dragstart', function(e){
+    if(e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
+      e.preventDefault();return false;
+    }
+  }, true);
+
+  // Disable text selection via mouse (except inputs)
+  document.addEventListener('mousedown', function(e){
+    if(e.detail>1 && e.target.tagName!=='INPUT' && e.target.tagName!=='TEXTAREA'){
+      e.preventDefault();
+    }
+  }, false);
+
+  // Disable print shortcut
+  window.addEventListener('beforeprint', function(e){
+    e.preventDefault();
+    return false;
+  });
+})();
+
+// =============================================
+// STORAGE
+// =============================================
+const _mem={};
+const Store={
+  set(k,v){const s=JSON.stringify(v);_mem[k]=s;try{localStorage.setItem(k,s);}catch(e){}},
+  get(k,def=null){
+    if(_mem[k]!==undefined){try{return JSON.parse(_mem[k]);}catch(e){return def;}}
+    try{const v=localStorage.getItem(k);if(v===null)return def;_mem[k]=v;return JSON.parse(v);}catch(e){return def;}
+  },
+  remove(k){delete _mem[k];try{localStorage.removeItem(k);}catch(e){}},
+};
+// Firebase is configured below
+
+// =============================================
+// FIREBASE CONFIG + USER DB
+// =============================================
+const FB_URL = 'https://area-da-sorte-default-rtdb.firebaseio.com';
+
+const UsersDB = {
+  _cache: null,
+
+  _default() {
+    return {
+      users: {
+        tisouza: {
+          name:'Tiago Souza', pass:btoa('souz@11'), role:'admin', plan:'admin',
+          email:'tisouza@icloud.com', username:'tisouza', loginId:'tisouza',
+          createdAt:'2025-01-01T00:00:00.000Z', expiresAt:null,
+          active:true, jogos:[], pendingPlan:null
+        }
+      },
+      notifications:[]
+    };
+  },
+
+  _ensureAdmin(d) {
+    if (!d || !d.users) d = {users:{}, notifications:[]};
+    if (!d.notifications) d.notifications = [];
+    if (!d.users['tisouza']) {
+      d.users['tisouza'] = {
+        name:'Tiago Souza', pass:btoa('souz@11'), role:'admin', plan:'admin',
+        email:'tisouza@icloud.com', username:'tisouza', loginId:'tisouza',
+        createdAt:'2025-01-01T00:00:00.000Z', expiresAt:null,
+        active:true, jogos:[], pendingPlan:null
+      };
+    }
+    return d;
+  },
+
+  // Firebase GET
+  async _fbGet() {
+    const r = await fetch(`${FB_URL}/db.json`, {signal:AbortSignal.timeout(6000)});
+    if (!r.ok) throw new Error('GET ' + r.status);
+    const d = await r.json();
+    if (!d || !d.users) throw new Error('empty');
+    return d;
+  },
+
+  // Firebase PUT
+  _fbPut(data) {
+    fetch(`${FB_URL}/db.json`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data),
+      signal:AbortSignal.timeout(8000)
+    }).then(r => {
+      if(r.ok) console.log('Firebase saved ✅');
+      else console.warn('Firebase save error:', r.status);
+    }).catch(e => console.warn('Firebase save failed:', e.message));
+  },
+
+  // Load local instantly, sync Firebase in background
+  load() {
+    let d = Store.get('as_db', null) || this._default();
+    d = this._ensureAdmin(d);
+    this._cache = d;
+    // Background sync — non-blocking
+    this._sync();
+    return d;
+  },
+
+  async _sync() {
+    try {
+      let d = await this._fbGet();
+      d = this._ensureAdmin(d);
+      const localUsers = Object.keys(this._cache?.users || {}).length;
+      const cloudUsers = Object.keys(d.users || {}).length;
+      if (cloudUsers >= localUsers) {
+        this._cache = d;
+        Store.set('as_db', d);
+        console.log('Firebase synced ✅', cloudUsers, 'usuários');
+      }
+    } catch(e) {
+      console.warn('Firebase sync failed, using local data:', e.message);
+    }
+  },
+
+  save(d) {
+    d = this._ensureAdmin(d);
+    this._cache = d;
+    Store.set('as_db', d);
+    this._fbPut(d);
+  },
+
+  getAll() {
+    if (this._cache) return this._cache;
+    let d = Store.get('as_db', null) || this._default();
+    d = this._ensureAdmin(d);
+    this._cache = d;
+    return d;
+  },
+
+  getUsers()   { return this.getAll().users || {}; },
+  getUser(u)   { return this.getUsers()[u] || null; },
+  saveUsers(u) { const d = this.getAll(); d.users = u; this.save(d); },
+  setUser(u,v) { const users = this.getUsers(); users[u] = v; this.saveUsers(users); },
+
+  getNotifications() { return this.getAll().notifications || []; },
+  addNotification(n) {
+    const d = this.getAll();
+    if (!d.notifications) d.notifications = [];
+    d.notifications.unshift({...n, id:Date.now(), read:false, time:new Date().toISOString()});
+    if (d.notifications.length > 50) d.notifications = d.notifications.slice(0,50);
+    this.save(d);
+  },
+  markNotifRead(id) {
+    const d = this.getAll();
+    if (d.notifications) d.notifications = d.notifications.map(n => n.id===id ? {...n,read:true} : n);
+    this.save(d);
+  },
+  clearNotifications() { const d = this.getAll(); d.notifications = []; this.save(d); },
+  ensureAdmin() { this.getAll(); }
+};
+
+// =============================================
+// STATE
+// =============================================
+let currentUser=null,currentUserData=null;
+let currentLot={desdobramentos:'lotofacil',gerador:'lotofacil',inteligencia:'lotofacil',combinacoes:'lotofacil',resultados:'lotofacil'};
+let dezenasSelected=[];
+let selectedPlan='mensal';
+
+// =============================================
+// NOTIFICATIONS
+// =============================================
+function showNotif(msg,type='success'){
+  const n=document.getElementById('notif');
+  n.textContent=msg;n.className='notif '+type+' show';
+  setTimeout(()=>n.classList.remove('show'),3200);
+}
+
+// =============================================
+// AUTH
+// =============================================
+function switchAuth(tab){
+  document.getElementById('login-form').style.display=tab==='login'?'':'none';
+  document.getElementById('register-form').style.display=tab==='register'?'':'none';
+  document.getElementById('auth-error').style.display='none';
+  const info=document.getElementById('auth-info');
+  if(tab==='register'){info.style.display='block';info.innerHTML='🎁 Você terá <strong>3 dias gratuitos</strong> para testar. Depois, ative via PIX para continuar.';}
+  else{info.style.display='none';}
+}
+function showAuthError(msg){const e=document.getElementById('auth-error');e.textContent=msg;e.style.display='block';}
+
+function doLogin(){
+  const input=document.getElementById('l-user').value.trim().toLowerCase();
+  const p=document.getElementById('l-pass').value;
+  if(!input||!p){showAuthError('Preencha todos os campos.');return;}
+  const btn=document.querySelector('#login-form .btn-primary');
+  if(btn){btn.textContent='Entrando...';btn.disabled=true;}
+  // Always reload from JSONBin to get latest users
+if(btn){btn.textContent='→ Entrar';btn.disabled=false;}
+  const users=UsersDB.getUsers();
+  // Search by: 1) exact key 2) email 3) username 4) loginId
+  let foundKey=null;
+  if(users[input]){ foundKey=input; }
+  else{
+    for(const[k,v] of Object.entries(users)){
+      if(v.email&&v.email.toLowerCase()===input){foundKey=k;break;}
+      if(v.username&&v.username.toLowerCase()===input){foundKey=k;break;}
+      if(v.loginId&&v.loginId.toLowerCase()===input){foundKey=k;break;}
+    }
+  }
+  if(!foundKey){showAuthError('Usuário ou e-mail não encontrado. Verifique os dados.');return;}
+  const ud=users[foundKey];
+  if(ud.pass!==btoa(p)){showAuthError('Senha incorreta.');return;}
+  currentUser=foundKey;currentUserData=ud;
+  Store.set('as_current',foundKey);
+  checkAccessAndEnter(ud);
+}
+
+async function doRegister(){
+  const name=document.getElementById('r-name').value.trim();
+  const email=(document.getElementById('r-email')?.value||'').trim().toLowerCase();
+  const username=(document.getElementById('r-user')?.value||'').trim().toLowerCase();
+  const p=document.getElementById('r-pass').value;
+  if(!name||!email||!username||!p){showAuthError('Preencha todos os campos.');return;}
+  if(p.length<6){showAuthError('Senha mínima de 6 caracteres.');return;}
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){showAuthError('Digite um e-mail válido.');return;}
+  if(!/^[a-z0-9_]+$/.test(username)){showAuthError('Usuário: apenas letras minúsculas, números e _ (sem espaços)');return;}
+  if(username.length<3){showAuthError('Usuário deve ter ao menos 3 caracteres.');return;}
+const users=UsersDB.getUsers();
+  if(users[username]){showAuthError('Este usuário já existe. Escolha outro.');return;}
+  const emailUsed=Object.values(users).some(u=>u.email&&u.email.toLowerCase()===email);
+  if(emailUsed){showAuthError('Este e-mail já está cadastrado.');return;}
+  const trialEnd=new Date();trialEnd.setDate(trialEnd.getDate()+3);
+  const newUser={name,email,username,pass:btoa(p),role:'user',plan:'trial',createdAt:new Date().toISOString(),expiresAt:trialEnd.toISOString(),active:true,jogos:[],pendingPlan:null};
+  users[username]=newUser;
+  UsersDB.saveUsers(users);
+  UsersDB.addNotification({type:'new_user',title:'🆕 Novo cadastro!',msg:`${name} (@${username} · ${email}) criou uma conta. Trial de 3 dias ativo.`,user:username});
+  currentUser=username;currentUserData=newUser;
+  Store.set('as_current',username);
+  checkAccessAndEnter(newUser);
+}
+
+function checkAccessAndEnter(ud){
+  if(ud.role==='admin'||ud.plan==='admin'||ud.plan==='livre'){enterApp(ud);return;}
+  // Check suspended
+  if(!ud.active){showSuspendedScreen(ud);return;}
+  // Check expired
+  if(ud.expiresAt){const exp=new Date(ud.expiresAt);if(new Date()>exp){showSuspendedScreen(ud);return;}}
+  enterApp(ud);
+}
+
+function showSuspendedScreen(ud){
+  // Hide all screens, show suspended
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='none';
+  const ss=document.getElementById('suspended-screen');
+  ss.style.display='flex';
+  // Set message
+  const exp=ud.expiresAt?new Date(ud.expiresAt):null;
+  const expired=exp&&new Date()>exp;
+  const msg=!ud.active
+    ?'Sua conta foi suspensa pelo administrador.'
+    :expired?`Seu plano venceu em ${exp.toLocaleDateString('pt-BR')}.`
+    :'Acesso restrito.';
+  const el=document.getElementById('suspended-msg');
+  if(el) el.textContent=msg+' Realize o pagamento via PIX para reativar seu acesso.';
+}
+
+function showSuspendedScreen(ud){
+  // Hide everything
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='none';
+  // Show suspended screen
+  const exp=ud.expiresAt?new Date(ud.expiresAt).toLocaleDateString('pt-BR'):'—';
+  const isExpired=ud.expiresAt&&new Date()>new Date(ud.expiresAt);
+  const msg=!ud.active
+    ?'Sua conta foi suspensa pelo administrador.'
+    :`Seu plano ${isExpired?'venceu em '+exp:'está inativo'}.`;
+  document.getElementById('suspended-msg').textContent=msg+' Realize o pagamento via PIX para reativar seu acesso.';
+  document.getElementById('suspended-screen').style.display='flex';
+}
+
+function showSuspended(ud){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('suspended-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  const exp=ud.expiresAt?new Date(ud.expiresAt).toLocaleDateString('pt-BR'):'N/A';
+  document.getElementById('suspended-msg').textContent=`Seu acesso venceu em ${exp}. Realize o pagamento via PIX para reativar imediatamente.`;
+}
+
+function selectPlan(p){
+  selectedPlan=p;
+  document.getElementById('plan-mensal').classList.toggle('selected',p==='mensal');
+  document.getElementById('plan-anual').classList.toggle('selected',p==='anual');
+}
+
+function copyPix(){
+  navigator.clipboard.writeText('2264bb61-2de7-4aa2-af8c-3c71ae28077c').then(()=>showNotif('Chave PIX copiada! ✅')).catch(()=>{showNotif('Chave: 2264bb61-2de7-4aa2-af8c-3c71ae28077c','error');});
+}
+
+function enterApp(ud,paywallMode=false){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('suspended-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  const firstName=ud.name.split(' ')[0];
+  document.getElementById('sb-name').textContent=firstName;
+  document.getElementById('ph-name').textContent=firstName;
+  const planLabels={admin:'👑 Admin',livre:'✨ Livre',mensal:'📅 Mensal',anual:'🌟 Anual',trial:'🎁 Trial 3 dias'};
+  const planEl=document.getElementById('sb-plan');
+  planEl.textContent=planLabels[ud.plan]||ud.plan;
+  planEl.className='u-plan '+(ud.plan==='admin'?'admin':ud.plan==='anual'?'anual':ud.plan==='trial'||ud.plan==='livre'?'trial':'mensal');
+  const expEl=document.getElementById('sb-expiry');
+  if(ud.expiresAt&&ud.plan!=='admin'&&ud.plan!=='livre'){
+    const exp=new Date(ud.expiresAt);const days=Math.ceil((exp-new Date())/(86400000));
+    if(days<=7){expEl.textContent=days<=0?'VENCIDO':days===1?'Vence amanhã!':('Vence em '+days+' dias');expEl.className='u-expiry warning';
+      setTimeout(()=>{
+        const a=document.getElementById('dash-alert');
+        if(a){
+          const msg=days<=0?'Seu plano venceu!':'Seu plano vence em '+days+' dia(s)!';
+          a.innerHTML='<div class="warn-box" style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><span>⏰ '+msg+'</span><button class="btn btn-blue btn-sm" onclick="navTo(\'meuplano\')">💳 Pagar agora</button></div>';
+        }
+      },400);
+    }else{expEl.textContent='Vence: '+exp.toLocaleDateString('pt-BR');expEl.className='u-expiry';}
+  }else expEl.textContent='';
+  if(ud.role==='admin'||ud.plan==='admin'){
+    document.getElementById('nav-admin').style.display='flex';
+    // Show JSONBin setup if not configured
+    setTimeout(()=>{
+      const card=document.getElementById('jbin-setup-card');
+      if(card) card.style.display=(!JBIN.key||!JBIN.bin)?'block':'none';
+    },500);
+  }
+  setupDesdobramentoConfig();updateDezJogoOptions();
+  if(!paywallMode)loadDashboard();
+  loadJogosSalvos();
+  // Hide nav items in paywall mode
+  const navItems=document.querySelectorAll('.nav-item:not(#nav-meuplano)');
+  navItems.forEach(n=>{if(paywallMode&&n.id!=='nav-admin')n.style.opacity='0.3';else n.style.opacity='';});
+}
+
+function doLogout(){
+  Store.remove('as_current');currentUser=null;currentUserData=null;
+  const sb=document.getElementById('sidebar');if(sb.classList.contains('open'))toggleSidebar();
+  document.getElementById('app').style.display='none';
+  document.getElementById('suspended-screen').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('nav-admin').style.display='none';
+  document.getElementById('l-user').value='';document.getElementById('l-pass').value='';
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Keyboard shortcuts
+  const addKey = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') fn(); });
+  };
+  addKey('l-pass', doLogin); addKey('l-user', doLogin);
+  addKey('r-pass', doRegister); addKey('r-user', doRegister);
+  addKey('r-name', doRegister); addKey('r-email', doRegister);
+
+  // Init UI
+  setupDesdobramentoConfig();
+  updateDezJogoOptions();
+
+  // Load local data instantly + sync Firebase in background
+  UsersDB.load();
+
+  // Auto-login if session saved
+  const saved = Store.get('as_current', null);
+  if (saved) {
+    const ud = UsersDB.getUser(saved);
+    if (ud) { currentUser = saved; currentUserData = ud; checkAccessAndEnter(ud); return; }
+  }
+})
+
+// =============================================
+// NAVIGATION
+// =============================================
+const pageNames={dashboard:'Início',desdobramentos:'Desdobramentos',gerador:'Gerador',inteligencia:'Inteligência',combinacoes:'Combinações',resultados:'Resultados',meusjogos:'Meus Jogos',meuplano:'Meu Plano',admin:'Admin'};
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar'),ov=document.getElementById('overlay');
+  sb.classList.toggle('open');ov.classList.toggle('show');
+  const open=sb.classList.contains('open');
+  document.getElementById('hb1').style.transform=open?'rotate(45deg) translate(5px,5px)':'';
+  document.getElementById('hb2').style.opacity=open?'0':'';
+  document.getElementById('hb3').style.transform=open?'rotate(-45deg) translate(5px,-5px)':'';
+}
+function isUserBlocked(){
+  if(!currentUser||!currentUserData)return false;
+  const ud=UsersDB.getUser(currentUser)||currentUserData;
+  if(ud.role==='admin'||ud.plan==='admin'||ud.plan==='livre')return false;
+  if(!ud.active)return true;
+  if(ud.expiresAt&&new Date()>new Date(ud.expiresAt))return true;
+  return false;
+}
+
+function navTo(page){
+  // Re-check access on every navigation (catches admin-suspended users)
+  if(page!=='meuplano'&&isUserBlocked()){
+    showSuspendedScreen(currentUserData||UsersDB.getUser(currentUser)||{});
+    return;
+  }
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const ni=document.querySelector(`.nav-item[onclick="navTo('${page}')"]`);if(ni)ni.classList.add('active');
+  document.getElementById('page-'+page).classList.add('active');
+  const tEl=document.getElementById('mobile-page-title');if(tEl)tEl.textContent=pageNames[page]||'Área da Sorte';
+  const sb=document.getElementById('sidebar');if(sb.classList.contains('open'))toggleSidebar();
+  if(page==='inteligencia')loadInteligencia();
+  if(page==='combinacoes')loadCombinacoes();
+  if(page==='resultados')loadUltimoResultado();
+  if(page==='gerador')loadJogosSalvos();
+  if(page==='admin')loadAdminPanel();
+  if(page==='meusjogos')loadMeusJogos();
+  if(page==='meusjogos')loadMeusJogos();
+  if(page==='meuplano')loadMeuPlano();
+}
+function setLotTab(el,section){
+  el.closest('.lot-tabs').querySelectorAll('.lot-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');currentLot[section]=el.dataset.lot;
+  if(section==='inteligencia')loadInteligencia();
+  if(section==='combinacoes')loadCombinacoes();
+  if(section==='resultados')loadUltimoResultado();
+  if(section==='desdobramentos')setupDesdobramentoConfig();
+  if(section==='gerador')updateDezJogoOptions();
+}
+
+// =============================================
+// API CAIXA
+// =============================================
+async function fetchLoteria(tipo,concurso=''){
+  const base=`https://servicebus2.caixa.gov.br/portaldeloterias/api/${tipo}/${concurso}`;
+  const proxies=[`https://corsproxy.io/?${encodeURIComponent(base)}`,`https://api.allorigins.win/get?url=${encodeURIComponent(base)}`];
+  for(const url of proxies){
+    try{
+      const r=await fetch(url,{signal:AbortSignal.timeout(9000)});
+      if(!r.ok)continue;
+      const raw=await r.json();
+      const d=raw.contents?JSON.parse(raw.contents):raw;
+      if(d&&d.numero)return d;
+    }catch(e){continue;}
+  }
+  throw new Error('API indisponível');
+}
+
+// =============================================
+// DASHBOARD
+// =============================================
+async function loadDashboard(){
+  const el=document.getElementById('dash-last-result');
+  el.innerHTML='<div class="loading"><div class="spinner"></div><p style="font-size:12px;">Carregando último resultado...</p></div>';
+  try{
+    const d=await fetchLoteria('lotofacil','');
+    const balls=d.dezenasSorteadasOrdemSorteio||d.listaDezenas||[];
+    el.innerHTML=`<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;"><div><span class="badge badge-blue">🔵 Lotofácil</span> <strong style="font-size:14px;color:var(--text);margin-left:6px;">Concurso ${d.numero}</strong></div><span style="font-size:12px;color:var(--text3);">${d.dataApuracao||''}</span></div><div class="balls">${balls.map(n=>`<div class="ball ball-loto ball-sm">${String(n).padStart(2,'0')}</div>`).join('')}</div>${d.acumulado?'<div style="margin-top:8px;"><span class="badge badge-yellow">⚡ Acumulou!</span></div>':''}</div>`;
+  }catch(e){el.innerHTML='<div class="info-box">📡 Aguardando conexão com a Caixa... <button class="btn btn-outline btn-sm" style="margin-left:8px;" onclick="loadDashboard()">🔄 Tentar novamente</button></div>';}
+}
+
+// =============================================
+// DESDOBRAMENTOS
+// =============================================
+const desdobConfig={lotofacil:{max:25,name:'Lotofácil',minJogo:15},megasena:{max:60,name:'Mega-Sena',minJogo:6}};
+const fechamentos={lotofacil:{11:{name:'Garantia 11 pts',dezenas:16,jogos:8},12:{name:'Garantia 12 pts',dezenas:17,jogos:17},13:{name:'Garantia 13 pts',dezenas:18,jogos:48},14:{name:'Garantia 14 pts',dezenas:20,jogos:180},15:{name:'Fechamento total',dezenas:20,jogos:15504}},megasena:{4:{name:'Garantia quadra',dezenas:7,jogos:7},5:{name:'Garantia quina',dezenas:8,jogos:28},6:{name:'Fechamento sena',dezenas:7,jogos:7}}};
+function setupDesdobramentoConfig(){
+  const lot=currentLot.desdobramentos;
+  document.getElementById('desdobramento-config-title').textContent=(lot==='lotofacil'?'🔵':'🟢')+' '+desdobConfig[lot].name+' — Configuração';
+  const sel=document.getElementById('garantia-sel');sel.innerHTML='<option value="">Selecione...</option>';
+  if(lot==='lotofacil')sel.innerHTML+=`<option value="11">Garantia 11 pontos</option><option value="12">Garantia 12 pontos</option><option value="13">Garantia 13 pontos</option><option value="14">Garantia 14 pontos</option><option value="15">Fechamento total</option>`;
+  else sel.innerHTML+=`<option value="4">Garantia quadra</option><option value="5">Garantia quina</option><option value="6">Fechamento sena</option>`;
+  dezenasSelected=[];document.getElementById('dezenas-picker').style.display='none';
+  document.getElementById('desdobramento-result').innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>Selecione a garantia desejada</p></div>';
+}
+function updateDesdobramento(){
+  const lot=currentLot.desdobramentos,g=document.getElementById('garantia-sel').value;
+  if(!g){document.getElementById('dezenas-picker').style.display='none';return;}
+  document.getElementById('dezenas-picker').style.display='block';
+  const grid=document.getElementById('dezenas-grid');grid.innerHTML='';
+  for(let i=1;i<=desdobConfig[lot].max;i++){
+    const d=document.createElement('div');
+    d.style.cssText='text-align:center;padding:7px 4px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:700;font-family:JetBrains Mono,monospace;border:1.5px solid rgba(37,99,235,0.15);color:var(--text2);transition:.15s;background:#f7fafd;user-select:none;';
+    d.textContent=String(i).padStart(2,'0');d.dataset.num=i;
+    d.addEventListener('click',()=>toggleDezena(d,g,lot));
+    grid.appendChild(d);
+  }
+  updateDesdobramentoResult(g,lot);
+}
+function toggleDezena(el,g,lot){
+  const n=parseInt(el.dataset.num),idx=dezenasSelected.indexOf(n);
+  if(idx>-1){dezenasSelected.splice(idx,1);el.style.background='#f7fafd';el.style.color='var(--text2)';el.style.borderColor='rgba(37,99,235,0.15)';}
+  else{dezenasSelected.push(n);el.style.background=lot==='lotofacil'?'#2563eb':'#16a34a';el.style.color='#fff';el.style.borderColor='transparent';}
+  document.getElementById('dezenas-count').textContent=dezenasSelected.length+' selecionadas';
+  updateDesdobramentoResult(g,lot);
+}
+function limparDezenas(){
+  dezenasSelected=[];
+  document.querySelectorAll('#dezenas-grid div').forEach(d=>{d.style.background='#f7fafd';d.style.color='var(--text2)';d.style.borderColor='rgba(37,99,235,0.15)';});
+  document.getElementById('dezenas-count').textContent='0 selecionadas';
+  updateDesdobramentoResult(document.getElementById('garantia-sel').value,currentLot.desdobramentos);
+}
+function updateDesdobramentoResult(g,lot){
+  const fec=fechamentos[lot]?.[g];const res=document.getElementById('desdobramento-result');
+  if(!fec){res.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>Selecione a garantia</p></div>';return;}
+  const bc=lot==='lotofacil'?'ball-loto':'ball-mega';
+  res.innerHTML=`<div class="card-title">📋 ${fec.name}</div><div class="info-box" style="margin-bottom:12px;">Selecione <strong>${fec.dezenas} dezenas</strong> para gerar <strong>${fec.jogos} jogos</strong> com garantia.</div><div style="margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap;"><span class="badge badge-blue">Dezenas: ${fec.dezenas}</span><span class="badge badge-blue">Jogos: ${fec.jogos}</span></div>${dezenasSelected.length?`<div><div style="font-size:11px;color:var(--text2);margin-bottom:6px;">Selecionadas (${dezenasSelected.length}/${fec.dezenas})</div><div class="balls">${dezenasSelected.sort((a,b)=>a-b).map(n=>`<div class="ball ${bc} ball-sm">${String(n).padStart(2,'0')}</div>`).join('')}</div></div>`:''}${dezenasSelected.length>=fec.dezenas?`<button class="btn btn-blue" style="margin-top:12px;width:100%;justify-content:center;" onclick="gerarDesdobramento('${g}','${lot}')">📊 Gerar Desdobramento</button>`:`<div class="warn-box" style="margin-top:10px;">Selecione mais ${fec.dezenas-dezenasSelected.length} dezena(s)</div>`}`;
+}
+function gerarDesdobramento(g,lot){
+  const fec=fechamentos[lot][g],dez=dezenasSelected.sort((a,b)=>a-b),min=desdobConfig[lot].minJogo;
+  const combos=[],max=Math.min(fec.jogos,50);
+  function comb(arr,k,s,cur){if(cur.length===k){combos.push([...cur]);return;}for(let i=s;i<arr.length;i++){cur.push(arr[i]);comb(arr,k,i+1,cur);cur.pop();}}
+  comb(dez,min,0,[]);
+  const bc=lot==='lotofacil'?'ball-loto':'ball-mega',shown=combos.slice(0,max);
+  document.getElementById('desdobramento-result').innerHTML=`<div class="card-title">✅ ${shown.length} jogos ${combos.length>max?'(primeiros '+max+')':''}</div><div style="max-height:380px;overflow-y:auto;">${shown.map((j,i)=>`<div class="game-row"><div class="game-meta">Jogo ${i+1}</div><div class="balls">${j.map(n=>`<div class="ball ${bc} ball-sm">${String(n).padStart(2,'0')}</div>`).join('')}</div></div>`).join('')}</div>`;
+}
+
+// =============================================
+// GERADOR IA AVANÇADO
+// =============================================
+function updateDezJogoOptions(){
+  const lot=currentLot.gerador,sel=document.getElementById('dez-jogo');sel.innerHTML='';
+  if(lot==='lotofacil')['15','16','17','18'].forEach(v=>sel.innerHTML+=`<option value="${v}">${v} dezenas${v==='15'?' (padrão)':''}</option>`);
+  else['6','7','8','9','10'].forEach(v=>sel.innerHTML+=`<option value="${v}">${v} dezenas${v==='6'?' (padrão)':''}</option>`);
+}
+
+const IA_STATS={
+  lotofacil:{freq:{1:2224,2:2198,3:2209,4:2223,5:2190,6:2175,7:2181,8:2174,9:2196,10:2286,11:2260,12:2208,13:2235,14:2219,15:2205,16:2145,17:2178,18:2188,19:2183,20:2297,21:2185,22:2194,23:2151,24:2227,25:2278},pares_raros:[[16,17],[8,16],[6,8],[6,16],[8,23],[9,16],[15,16]],pares_freq:[[11,20],[10,25],[10,20],[13,20],[20,25]],primos:[2,3,5,7,11,13,17,19,23],somaIdeal:[166,224],total:3671},
+  megasena:{freq:{1:450,2:400,3:465,4:523,5:540,6:428,7:460,8:472,9:410,10:550,11:505,12:490,13:375,14:452,15:440,16:418,17:515,18:463,19:425,20:372,21:405,22:485,23:538,24:435,25:527,26:495,27:415,28:442,29:502,30:388,31:480,32:378,33:535,34:508,35:392,36:478,37:445,38:420,39:518,40:382,41:530,42:512,43:412,44:475,45:455,46:402,47:395,48:520,49:432,50:488,51:385,52:422,53:543,54:380,55:470,56:408,57:390,58:398,59:438,60:498},pares_raros:[[26,27],[12,50],[22,60],[31,42]],pares_freq:[[10,53],[5,23],[33,41],[25,4]],primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59],somaIdeal:[140,220],total:2800}
+};
+
+function calcPeso(n,lot,opts){
+  const st=IA_STATS[lot],maxFreq=Math.max(...Object.values(st.freq));
+  let peso=5;const freqNorm=(st.freq[n]||0)/maxFreq;
+  if(opts.fQuentes)peso+=freqNorm*8;
+  if(opts.fFrias)peso+=(1-freqNorm)*3;
+  if(opts.fPrimos&&st.primos.includes(n))peso+=1.5;
+  return Math.max(0.5,peso);
+}
+
+function scorarJogo(jogo,lot,opts){
+  const st=IA_STATS[lot];let score=100;
+  const sorted=[...jogo].sort((a,b)=>a-b);
+  if(opts.fParidade){const pares=jogo.filter(n=>n%2===0).length;score-=Math.abs(pares-jogo.length/2)*8;}
+  if(opts.fSeq){let maxC=1,c=1;for(let i=1;i<sorted.length;i++){if(sorted[i]===sorted[i-1]+1)c++;else c=1;maxC=Math.max(maxC,c);}if(maxC>opts.maxConsec)score-=(maxC-opts.maxConsec)*15;}
+  if(opts.fSoma){const soma=jogo.reduce((a,b)=>a+b,0);const[sMin,sMax]=st.somaIdeal;if(soma<sMin)score-=(sMin-soma)*0.8;if(soma>sMax)score-=(soma-sMax)*0.8;}
+  if(opts.fPares){for(const[a,b]of st.pares_raros){if(jogo.includes(a)&&jogo.includes(b))score-=12;}}
+  for(const[a,b]of st.pares_freq){if(jogo.includes(a)&&jogo.includes(b))score+=5;}
+  if(opts.fPrimos){const np=jogo.filter(n=>st.primos.includes(n)).length;const ideal=lot==='lotofacil'?5:2;score-=Math.abs(np-ideal)*4;}
+  return score;
+}
+
+function gerarJogos(){
+  const lot=currentLot.gerador,qtd=parseInt(document.getElementById('qtd-jogos').value),dez=parseInt(document.getElementById('dez-jogo').value),max=lot==='lotofacil'?25:60;
+  const opts={fQuentes:document.getElementById('f-quentes').checked,fFrias:document.getElementById('f-frias').checked,fParidade:document.getElementById('f-paridade').checked,fSeq:document.getElementById('f-seq').checked,maxConsec:parseInt(document.getElementById('qtd-consec').value),fSoma:document.getElementById('f-soma').checked,fPares:document.getElementById('f-pares').checked,fPrimos:document.getElementById('f-primos').checked};
+  const numFrias=parseInt(document.getElementById('qtd-frias').value);
+  const st=IA_STATS[lot];
+  const sorted=[...Array(max)].map((_,i)=>i+1).sort((a,b)=>st.freq[b]-st.freq[a]);
+  const quentes=sorted.slice(0,Math.ceil(max*0.4)),frias=sorted.slice(Math.floor(max*0.6)),pool=[...Array(max)].map((_,i)=>i+1);
+  const candidatos=[];let attempts=0;
+  while(candidatos.length<qtd*8&&attempts<5000){
+    attempts++;const picked=new Set();
+    if(opts.fQuentes){const qS=[...quentes].sort(()=>Math.random()-.5);for(const n of qS){if(picked.size>=dez-numFrias)break;picked.add(n);}}
+    if(opts.fFrias&&picked.size<dez){const fS=[...frias].sort(()=>Math.random()-.5);let added=0;for(const n of fS){if(added>=numFrias||picked.size>=dez)break;if(!picked.has(n)){picked.add(n);added++;}}}
+    while(picked.size<dez){const w=pool.filter(n=>!picked.has(n)),ws=w.map(n=>calcPeso(n,lot,opts)),total=ws.reduce((a,b)=>a+b,0);let r=Math.random()*total,acc=0;for(let i=0;i<w.length;i++){acc+=ws[i];if(r<=acc){picked.add(w[i]);break;}}}
+    if(picked.size<dez)continue;
+    const arr=[...picked].sort((a,b)=>a-b),key=arr.join(',');
+    if(candidatos.some(c=>c.nums.join(',')===key))continue;
+    candidatos.push({nums:arr,score:scorarJogo(arr,lot,opts)});
+  }
+  candidatos.sort((a,b)=>b.score-a.score);
+  const jogos=candidatos.slice(0,qtd).map(c=>c.nums);
+  if(!jogos.length){document.getElementById('jogos-gerados').innerHTML='<div class="warn-box">Não foi possível gerar jogos. Tente relaxar os filtros.</div>';return;}
+  window._jogosAtuais={jogos,lot};
+  const bc=lot==='lotofacil'?'ball-loto':'ball-mega';
+  document.getElementById('jogos-gerados').innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(37,99,235,0.10);"><span style="font-size:13px;font-weight:600;color:var(--text);flex:1;">${jogos.length} jogos gerados</span><button class="btn btn-outline btn-sm" onclick="copiarTodosJogosGerados()">📋 Copiar</button><button class="btn btn-outline btn-sm" onclick="exportarPDFGerados()">📄 PDF</button><button class="btn btn-blue btn-sm" onclick="salvarTodosJogos()">💾 Salvar</button></div>${jogos.map((j,i)=>`<div class="game-row"><div class="game-row-header"><div class="game-meta">Jogo ${i+1} · Soma: ${j.reduce((a,b)=>a+b,0)}</div><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-sm" onclick="copiarJogoGerado([${j}],${i+1})">📋</button><button class="btn btn-outline btn-sm" onclick="salvarJogo([${j}],'${lot}')">💾</button></div></div><div class="balls">${j.map(n=>`<div class="ball ${bc} ball-sm">${String(n).padStart(2,'0')}</div>`).join('')}</div></div>`).join('')}`;
+}
+
+// =============================================
+// JOGOS SALVOS
+// =============================================
+function getUserJogos(){
+  const ud=UsersDB.getUser(currentUser);return ud?.jogos||Store.get('as_jogos_'+currentUser,[]);
+}
+function setUserJogos(jogos){
+  const users=UsersDB.getUsers();
+  if(users[currentUser]){users[currentUser].jogos=jogos;UsersDB.saveUsers(users);}
+  Store.set('as_jogos_'+currentUser,jogos);
+}
+function salvarJogo(nums,lot){
+  const jogos=getUserJogos();
+  // Store concurso reference for result checking
+  const ultimoConcurso = window._ultimoConcurso?.[lot]||null;
+  jogos.push({id:Date.now()+Math.random(),lot,nums,
+    data:new Date().toLocaleDateString('pt-BR'),
+    concurso:ultimoConcurso});
+  setUserJogos(jogos);showNotif('Jogo salvo! ✅');loadJogosSalvos();
+}
+function salvarTodosJogos(){
+  const{jogos,lot}=window._jogosAtuais||{};if(!jogos)return;
+  const saved=getUserJogos(),data=new Date().toLocaleDateString('pt-BR');
+  const ultimoConcurso = window._ultimoConcurso?.[lot]||null;
+  jogos.forEach(nums=>saved.push({id:Date.now()+Math.random(),lot,nums,data,concurso:ultimoConcurso}));
+  setUserJogos(saved);showNotif(`${jogos.length} jogos salvos! ✅`);loadJogosSalvos();
+}
+function deletarJogo(id){
+  const jogos=getUserJogos().filter(j=>j.id!==id);setUserJogos(jogos);loadJogosSalvos();showNotif('Jogo removido.','error');
+}
+function loadJogosSalvos(){
+  const all=getUserJogos(),sec=document.getElementById('jogos-salvos-section'),list=document.getElementById('jogos-salvos-list'),empty=document.getElementById('jogos-salvos-empty'),filtroData=document.getElementById('filtro-data'),filtroLot=document.getElementById('filtro-lot');
+  if(!all.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  const datas=[...new Set(all.map(j=>j.data))],selData=filtroData.value;
+  filtroData.innerHTML='<option value="">Todas as datas</option>';
+  datas.forEach(d=>filtroData.innerHTML+=`<option value="${d}" ${d===selData?'selected':''}>${d}</option>`);
+  let jogos=[...all].reverse();
+  if(filtroData.value)jogos=jogos.filter(j=>j.data===filtroData.value);
+  if(filtroLot.value)jogos=jogos.filter(j=>j.lot===filtroLot.value);
+  if(!jogos.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  const groups={};jogos.forEach(j=>{if(!groups[j.data])groups[j.data]=[];groups[j.data].push(j);});
+  list.innerHTML=Object.entries(groups).map(([date,items])=>`<div style="margin-bottom:16px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;"><div style="font-size:10px;font-weight:700;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px;">📅 ${date} · ${items.length} jogo(s)</div><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-sm" onclick="copiarGrupoData('${date}')">📋</button><button class="btn btn-outline btn-sm" onclick="exportarPDFData('${date}')">📄</button></div></div>${items.map(j=>{const bc=j.lot==='lotofacil'?'ball-loto':'ball-mega';return`<div class="game-row"><div class="game-row-header"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;"><span style="font-size:11px;color:var(--text3);">${j.lot==='lotofacil'?'🔵 Lotofácil':'🟢 Mega-Sena'}</span><span style="font-size:11px;color:var(--text3);">· Σ${j.nums.reduce((a,b)=>a+b,0)}</span></div><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-sm" onclick="copiarJogoSalvo(${JSON.stringify(j.nums)},'${j.data}','${j.lot}')">📋</button><button class="btn btn-outline btn-sm" onclick="exportarPDFJogoUnico(${JSON.stringify(j.nums)},'${j.data}','${j.lot}')">📄</button><button class="btn btn-danger btn-sm" onclick="deletarJogo(${j.id})">🗑️</button></div></div><div class="balls">${j.nums.map(n=>`<div class="ball ${bc} ball-sm">${String(n).padStart(2,'0')}</div>`).join('')}</div></div>`;}).join('')}</div>`).join('');
+}
+
+// =============================================
+// COPY / PDF
+// =============================================
+function copiarJogoGerado(nums,idx){navigator.clipboard.writeText(`Jogo ${idx}: ${nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Soma: ${nums.reduce((a,b)=>a+b,0)}`).then(()=>showNotif(`Jogo ${idx} copiado! 📋`)).catch(()=>showNotif('Erro','error'));}
+function copiarTodosJogosGerados(){const{jogos,lot}=window._jogosAtuais||{};if(!jogos){showNotif('Nenhum jogo.','error');return;}const ln=lot==='lotofacil'?'Lotofácil':'Mega-Sena';const lines=[`=== Área da Sorte — ${ln} ===`,`Gerado: ${new Date().toLocaleDateString('pt-BR')}`,``];jogos.forEach((j,i)=>lines.push(`Jogo ${i+1}: ${j.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.reduce((a,b)=>a+b,0)}`));navigator.clipboard.writeText(lines.join('\n')).then(()=>showNotif(`${jogos.length} jogos copiados! 📋`)).catch(()=>showNotif('Erro','error'));}
+function copiarJogoSalvo(nums,data,lot){navigator.clipboard.writeText(`[${lot==='lotofacil'?'Lotofácil':'Mega-Sena'} · ${data}]\n${nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${nums.reduce((a,b)=>a+b,0)}`).then(()=>showNotif('Copiado! 📋')).catch(()=>showNotif('Erro','error'));}
+function copiarGrupoData(date){const all=getUserJogos(),jogos=all.filter(j=>j.data===date);const lines=[`=== Área da Sorte · ${date} ===`,``];jogos.forEach((j,i)=>lines.push(`Jogo ${i+1} [${j.lot==='lotofacil'?'Lotofácil':'Mega-Sena'}]: ${j.nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.nums.reduce((a,b)=>a+b,0)}`));navigator.clipboard.writeText(lines.join('\n')).then(()=>showNotif(`${jogos.length} jogos copiados! 📋`)).catch(()=>showNotif('Erro','error'));}
+function copiarJogosSalvos(){const all=getUserJogos();const fd=document.getElementById('filtro-data')?.value||'';const fl=document.getElementById('filtro-lot')?.value||'';let jogos=[...all];if(fd)jogos=jogos.filter(j=>j.data===fd);if(fl)jogos=jogos.filter(j=>j.lot===fl);if(!jogos.length){showNotif('Nenhum jogo.','error');return;}const lines=[`=== Área da Sorte — Jogos Salvos ===`,``];jogos.forEach((j,i)=>lines.push(`Jogo ${i+1} [${j.lot==='lotofacil'?'Lotofácil':'Mega-Sena'} · ${j.data}]: ${j.nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.nums.reduce((a,b)=>a+b,0)}`));navigator.clipboard.writeText(lines.join('\n')).then(()=>showNotif(`${jogos.length} jogos copiados! 📋`)).catch(()=>showNotif('Erro','error'));}
+function buildPDF(jogos,titulo,sub){
+  const data=new Date().toLocaleDateString('pt-BR');
+  const rows=jogos.map((j,i)=>{const bc=j.lot==='lotofacil'?'#2563eb':'#16a34a';return`<tr style="border-bottom:1px solid #e8eef5"><td style="padding:8px;font-weight:600;color:#4a6080;width:55px">Jogo ${i+1}</td><td style="padding:8px;font-size:11px;color:#8aa0bc;width:80px">${j.lot==='lotofacil'?'Lotofácil':'Mega-Sena'}<br>${j.data||''}</td><td style="padding:8px">${j.nums.map(n=>`<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:${bc};color:#fff;border-radius:50%;font-size:10px;font-weight:700;margin:2px;font-family:monospace">${String(n).padStart(2,'0')}</span>`).join('')}</td><td style="padding:8px;color:#8aa0bc;font-size:11px">Σ${j.nums.reduce((a,b)=>a+b,0)}</td></tr>`;}).join('');
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo}</title><style>body{font-family:Arial,sans-serif;background:#f0f4f8;margin:0;padding:16px}.c{max-width:740px;margin:0 auto;background:#fff;border-radius:14px;padding:28px;box-shadow:0 4px 24px rgba(30,80,180,.10)}.h{display:flex;align-items:center;gap:12px;border-bottom:2px solid #e8eef5;padding-bottom:14px;margin-bottom:18px}.logo{width:44px;height:44px;background:linear-gradient(135deg,#1a56c4,#2563eb);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}h1{font-size:17px;color:#1a2a4a;margin:0 0 2px}.sub{font-size:11px;color:#4a6080}table{width:100%;border-collapse:collapse}thead tr{background:#f0f4f8}th{padding:8px;text-align:left;font-size:9px;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px}.f{margin-top:18px;padding-top:12px;border-top:1px solid #e8eef5;font-size:10px;color:#8aa0bc;text-align:center}@media print{body{background:#fff;padding:0}.c{box-shadow:none;border-radius:0}}</style></head><body><div class="c"><div class="h"><div class="logo"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 3L16.5 10.5H24.5L18.2 15.1L20.7 22.6L14 18L7.3 22.6L9.8 15.1L3.5 10.5H11.5L14 3Z" fill="white"/></svg></div><div><h1>${titulo}</h1><div class="sub">${sub} · ${data}</div></div></div><table><thead><tr><th>Nº</th><th>Loteria</th><th>Dezenas</th><th>Info</th></tr></thead><tbody>${rows}</tbody></table><div class="f">Área da Sorte · ${data} · ${jogos.length} jogo(s)</div></div><scr'+'ipt>window.onload=()=>window.print()<\/scr'+'ipt></body></html>`;
+  const b=new Blob([html],{type:'text/html'}),url=URL.createObjectURL(b),w=window.open(url,'_blank');
+  if(!w){showNotif('Permita pop-ups para PDF.','error');return;}
+  setTimeout(()=>URL.revokeObjectURL(url),30000);showNotif('PDF pronto! Use Ctrl+P para salvar 📄');
+}
+function exportarPDFGerados(){const{jogos,lot}=window._jogosAtuais||{};if(!jogos){showNotif('Nenhum jogo.','error');return;}const data=new Date().toLocaleDateString('pt-BR');buildPDF(jogos.map(nums=>({nums,data,lot})),`Área da Sorte — ${lot==='lotofacil'?'Lotofácil':'Mega-Sena'}`,`${jogos.length} jogo(s)`);}
+function exportarPDFJogoUnico(nums,data,lot){buildPDF([{nums,data,lot}],`Área da Sorte — ${lot==='lotofacil'?'Lotofácil':'Mega-Sena'}`,'1 jogo');}
+function exportarPDFData(date){const jogos=getUserJogos().filter(j=>j.data===date);if(!jogos.length){showNotif('Nenhum jogo.','error');return;}buildPDF(jogos,`Área da Sorte — ${date}`,`${jogos.length} jogo(s)`);}
+function exportarPDFSalvos(){const all=getUserJogos();const fd=document.getElementById('filtro-data')?.value||'';const fl=document.getElementById('filtro-lot')?.value||'';let jogos=[...all];if(fd)jogos=jogos.filter(j=>j.data===fd);if(fl)jogos=jogos.filter(j=>j.lot===fl);if(!jogos.length){showNotif('Nenhum jogo.','error');return;}buildPDF(jogos,'Área da Sorte — Jogos Salvos',`${jogos.length} jogo(s)`);}
+
+// =============================================
+// INTELIGÊNCIA
+// =============================================
+const INTEL={lotofacil:{freq:[[20,2297],[10,2286],[25,2278],[11,2260],[13,2235],[24,2227],[1,2224],[4,2223],[14,2219],[3,2209],[12,2208],[15,2205],[2,2198],[9,2196],[22,2194],[5,2190],[18,2188],[21,2185],[19,2183],[7,2181],[17,2178],[6,2175],[8,2174],[23,2151],[16,2145]],atraso:[[20,5],[25,4],[8,2],[22,2],[2,1],[11,1],[14,1],[19,1],[23,1],[24,1]],total:3671,soma:195,pares:7.2,primos:5.4},megasena:{freq:[[10,550],[53,543],[5,540],[23,538],[33,535],[41,530],[25,527],[4,523],[48,520],[39,518],[17,515],[42,512],[34,508],[11,505],[29,502],[60,498],[26,495],[12,490],[50,488],[22,485],[31,480],[36,478],[44,475],[8,472],[55,470],[3,465],[18,463],[7,460],[45,455],[14,452],[1,450],[37,445],[28,442],[15,440],[59,438],[24,435],[49,432],[6,428],[19,425],[52,422],[38,420],[16,418],[27,415],[43,412],[9,410],[56,408],[21,405],[46,402],[2,400],[58,398],[47,395],[35,392],[57,390],[30,388],[51,385],[40,382],[54,380],[32,378],[13,375],[20,372]],atraso:[[26,8],[27,6],[12,5],[50,4],[22,3],[60,3],[31,2],[42,2],[8,1],[55,1]],total:2800,soma:188,pares:3.0,primos:2.8}};
+function loadInteligencia(){
+  const lot=currentLot.inteligencia;
+  document.getElementById('intel-loading').style.display='block';document.getElementById('intel-content').style.display='none';
+  const d=INTEL[lot];
+  document.getElementById('intel-loading').style.display='none';document.getElementById('intel-content').style.display='block';
+  document.getElementById('intel-subtitle').textContent=`Análise estatística de ${d.total} concursos`;
+  const[top]=d.freq,[topA]=d.atraso;
+  const bc=lot==='lotofacil'?'#2563eb':'#16a34a';
+  document.getElementById('intel-stats').innerHTML=`<div class="stat-card"><div class="stat-label">📈 Mais Frequente</div><div class="stat-val">${String(top[0]).padStart(2,'0')}</div><div class="stat-sub">${top[1]}x sorteada</div></div><div class="stat-card"><div class="stat-label">🧊 Maior Atraso</div><div class="stat-val" style="color:#dc2626">${String(topA[0]).padStart(2,'0')}</div><div class="stat-sub">${topA[1]} concursos sem sair</div></div><div class="stat-card"><div class="stat-label">⚖️ Média Par/Ímpar</div><div class="stat-val">${d.pares}/${(15-d.pares).toFixed(1)}</div><div class="stat-sub">pares / ímpares</div></div><div class="stat-card"><div class="stat-label">➕ Soma Média</div><div class="stat-val">${d.soma}</div><div class="stat-sub">faixa ideal</div></div>`;
+  const sorted=[...d.freq].sort((a,b)=>b[1]-a[1]).slice(0,25),maxV=sorted[0][1];
+  document.getElementById('freq-chart').innerHTML=`<div class="bar-chart">${sorted.map(([n,v])=>`<div class="bar-item" style="height:${Math.round(v/maxV*100)}%;background:${bc}" title="${n}: ${v}x"></div>`).join('')}</div><div style="display:flex;gap:2px;margin-top:3px;">${sorted.map(([n])=>`<span style="flex:1;text-align:center;font-size:8px;color:var(--text3);font-family:monospace">${String(n).padStart(2,'0')}</span>`).join('')}</div>`;
+  const bT=(n,c)=>`<div style="width:26px;height:26px;background:${c};color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">${String(n).padStart(2,'0')}</div>`;
+  const top10=[...d.freq].sort((a,b)=>b[1]-a[1]).slice(0,10);
+  document.getElementById('top10-freq').innerHTML=`<thead><tr><th>#</th><th>Dezena</th><th>Vezes</th><th>%</th></tr></thead><tbody>${top10.map(([n,v],i)=>`<tr><td>${i+1}º</td><td>${bT(n,bc)}</td><td>${v}</td><td>${((v/d.total)*100).toFixed(1)}%</td></tr>`).join('')}</tbody>`;
+  const bot10=[...d.freq].sort((a,b)=>a[1]-b[1]).slice(0,10);
+  document.getElementById('top10-menos').innerHTML=`<thead><tr><th>#</th><th>Dezena</th><th>Vezes</th><th>%</th></tr></thead><tbody>${bot10.map(([n,v],i)=>`<tr><td>${i+1}º</td><td>${bT(n,'#ef4444')}</td><td>${v}</td><td>${((v/d.total)*100).toFixed(1)}%</td></tr>`).join('')}</tbody>`;
+  document.getElementById('top10-atraso').innerHTML=`<thead><tr><th>#</th><th>Dezena</th><th>Atraso</th></tr></thead><tbody>${d.atraso.slice(0,10).map(([n,a],i)=>`<tr><td>${i+1}º</td><td>${bT(n,'#ea580c')}</td><td>${a} concurso(s)</td></tr>`).join('')}</tbody>`;
+}
+
+// =============================================
+// COMBINAÇÕES
+// =============================================
+const COMBOS={lotofacil:{freq:[[11,20,1401],[10,25,1397],[10,20,1391],[13,20,1390],[20,25,1382],[10,11,1371],[14,20,1371],[9,10,1361],[1,10,1355],[11,13,1350],[1,11,1345],[12,20,1340],[4,20,1335],[11,25,1330],[10,13,1325]],raros:[[16,17,1173],[8,16,1186],[6,8,1194],[6,16,1196],[8,23,1200],[9,16,1204],[15,16,1204],[16,23,1207],[8,17,1207],[8,19,1209]],total:3671},megasena:{freq:[[10,53,320],[5,23,315],[33,41,310],[25,4,308],[48,39,305],[17,42,300],[34,11,298],[29,60,295],[10,23,292],[53,5,290],[33,48,285],[41,25,280],[4,39,278],[17,53,275],[10,41,272]],raros:[[26,27,180],[12,50,182],[22,60,183],[31,42,185],[8,55,187],[26,12,189],[27,50,190],[22,31,192],[60,8,193],[55,26,195]],total:2800}};
+function loadCombinacoes(){
+  const lot=currentLot.combinacoes;
+  document.getElementById('combo-loading').style.display='none';document.getElementById('combo-content').style.display='block';
+  document.getElementById('combo-subtitle').textContent=`Correlações e padrões · ${COMBOS[lot].total} concursos`;
+  renderComboPares(lot);
+}
+function setComboTab(tab,el){
+  document.querySelectorAll('.combo-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  ['pares','sequencias','repeticoes','heatmap'].forEach(t=>document.getElementById('combo-'+t).style.display=t===tab?'':'none');
+  if(tab==='heatmap')renderHeatmap(currentLot.combinacoes);
+  if(tab==='sequencias')renderSequencias(currentLot.combinacoes);
+  if(tab==='repeticoes')renderRepeticoes(currentLot.combinacoes);
+  if(tab==='pares')renderComboPares(currentLot.combinacoes);
+}
+function renderComboPares(lot){
+  const d=COMBOS[lot],bc=lot==='lotofacil'?'ball-loto':'ball-mega';
+  const bF=(n)=>`<div class="ball ${bc} ball-sm">${String(n).padStart(2,'0')}</div>`;
+  const bR=(n)=>`<div class="ball ball-sm" style="background:#ef4444;color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">${String(n).padStart(2,'0')}</div>`;
+  document.getElementById('pares-freq').innerHTML=`<thead><tr><th>#</th><th>Par</th><th>Vezes</th><th>%</th></tr></thead><tbody>${d.freq.map(([a,b,v],i)=>`<tr><td>${i+1}º</td><td><div style="display:flex;align-items:center;gap:3px;">${bF(a)}<span style="color:var(--text3)">+</span>${bF(b)}</div></td><td>${v}</td><td>${((v/d.total)*100).toFixed(1)}%</td></tr>`).join('')}</tbody>`;
+  document.getElementById('pares-raros').innerHTML=`<thead><tr><th>#</th><th>Par</th><th>Vezes</th><th>%</th></tr></thead><tbody>${d.raros.map(([a,b,v],i)=>`<tr><td>${i+1}º</td><td><div style="display:flex;align-items:center;gap:3px;">${bR(a)}<span style="color:var(--text3)">+</span>${bR(b)}</div></td><td>${v}</td><td>${((v/d.total)*100).toFixed(1)}%</td></tr>`).join('')}</tbody>`;
+}
+function renderSequencias(lot){const data=lot==='lotofacil'?[['2 consecutivos',1800,'49.1%'],['3 consecutivos',1100,'30.0%'],['4 consecutivos',420,'11.4%'],['5+ consecutivos',180,'4.9%'],['Nenhum',171,'4.7%']]:[['2 consecutivos',820,'29.3%'],['3 consecutivos',480,'17.1%'],['4 consecutivos',220,'7.9%'],['5+ consecutivos',90,'3.2%'],['Nenhum',1190,'42.5%']];document.getElementById('seq-content').innerHTML=`<table class="data-table"><thead><tr><th>Padrão</th><th>Ocorrências</th><th>%</th></tr></thead><tbody>${data.map(([p,n,pct])=>`<tr><td>${p}</td><td>${n}</td><td>${pct}</td></tr>`).join('')}</tbody></table>`;}
+function renderRepeticoes(lot){const data=lot==='lotofacil'?[['0 repetições',45,'1.2%'],['1–3 repetições',320,'8.7%'],['4–6 repetições',980,'26.7%'],['7–9 repetições',1650,'45.0%'],['10+ repetições',676,'18.4%']]:[['0 repetições',120,'4.3%'],['1 repetição',450,'16.1%'],['2 repetições',680,'24.3%'],['3 repetições',780,'27.9%'],['4+ repetições',770,'27.5%']];document.getElementById('rep-content').innerHTML=`<table class="data-table"><thead><tr><th>Padrão</th><th>Ocorrências</th><th>%</th></tr></thead><tbody>${data.map(([p,n,pct])=>`<tr><td>${p}</td><td>${n}</td><td>${pct}</td></tr>`).join('')}</tbody></table>`;}
+function renderHeatmap(lot){
+  const nums=lot==='lotofacil'?25:60,freq=Object.fromEntries(INTEL[lot].freq),maxF=Math.max(...Object.values(freq)),cols=lot==='lotofacil'?5:10,bc=lot==='lotofacil'?[26,99,235]:[22,163,74];
+  document.getElementById('hm-content').innerHTML=`<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:4px;">${[...Array(nums)].map((_,i)=>{const n=i+1,v=freq[n]||0,pct=v/maxF;return`<div class="hm-cell" style="background:rgba(${bc[0]},${bc[1]},${bc[2]},${(0.08+pct*0.85).toFixed(2)});color:${pct>0.55?'#fff':'#1a2a4a'};">${String(n).padStart(2,'0')}<br><span style="font-size:8px;font-weight:400;">${v}</span></div>`;}).join('')}</div>`;
+}
+
+// =============================================
+// RESULTADOS
+// =============================================
+let resultadoConcursoAtual=null;
+async function loadUltimoResultado(){
+  document.getElementById('resultado-loading').innerHTML='<div class="spinner"></div><p>Carregando resultado...</p>';
+  document.getElementById('resultado-loading').style.display='block';document.getElementById('resultado-content').style.display='none';
+  try{const d=await fetchLoteria(currentLot.resultados,'');resultadoConcursoAtual=d.numero;renderResultado(d,currentLot.resultados);}
+  catch(e){document.getElementById('resultado-loading').innerHTML=`<div class="info-box">📡 Aguardando conexão... <button class="btn btn-outline btn-sm" style="margin-left:8px;" onclick="loadUltimoResultado()">🔄 Tentar novamente</button></div>`;}
+}
+async function navResultado(dir){
+  if(!resultadoConcursoAtual)return;const next=resultadoConcursoAtual+dir;if(next<1)return;
+  document.getElementById('resultado-loading').innerHTML='<div class="spinner"></div><p>Carregando...</p>';
+  document.getElementById('resultado-loading').style.display='block';document.getElementById('resultado-content').style.display='none';
+  try{const d=await fetchLoteria(currentLot.resultados,next);resultadoConcursoAtual=d.numero;renderResultado(d,currentLot.resultados);}
+  catch(e){showNotif('Concurso não encontrado.','error');document.getElementById('resultado-loading').style.display='none';document.getElementById('resultado-content').style.display='block';}
+}
+let _buscarTO=null;
+function buscarConcurso(){clearTimeout(_buscarTO);const v=document.getElementById('busca-concurso').value;if(!v)return;_buscarTO=setTimeout(async()=>{document.getElementById('resultado-loading').innerHTML='<div class="spinner"></div><p>Buscando...</p>';document.getElementById('resultado-loading').style.display='block';document.getElementById('resultado-content').style.display='none';try{const d=await fetchLoteria(currentLot.resultados,v);resultadoConcursoAtual=d.numero;renderResultado(d,currentLot.resultados);}catch(e){showNotif('Concurso não encontrado.','error');document.getElementById('resultado-loading').style.display='none';}},700);}
+function renderResultado(d,lot){
+  document.getElementById('resultado-loading').style.display='none';
+  document.getElementById('resultado-content').style.display='block';
+  const balls=(d.dezenasSorteadasOrdemSorteio||d.listaDezenas||d.dezenas||[]).map(n=>parseInt(n));
+
+  // Cache this result for Meus Jogos
+  if(!window._ultimoConcurso) window._ultimoConcurso={};
+  window._ultimoConcurso[lot]=d.numero;
+  _resultadosCache[lot+'_'+d.numero]=balls;
+
+  const premios=d.listaRateioPremio||d.premiacoes||[];
+  let premHTML='';
+  if(premios.length) premHTML=`<div style="margin-top:14px;"><div class="card-title">🏆 Premiação Oficial</div><div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Faixa</th><th>Ganhadores</th><th>Prêmio</th></tr></thead><tbody>${premios.map(p=>`<tr><td>${p.descricaoFaixa||p.acertos||''}</td><td>${(p.numeroDeGanhadores||p.ganhadores||0).toLocaleString('pt-BR')}</td><td style="color:#16a34a;font-weight:600;">R$ ${parseFloat(p.valorPremio||p.premio||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')}</tbody></table></div></div>`;
+
+  // My games for this concurso
+  const meusJogos = getUserJogos().filter(j=>j.lot===lot);
+  let meusHTML = '';
+  if(meusJogos.length){
+    const comAcertos = meusJogos.map(j=>{
+      const ac=j.nums.filter(n=>balls.includes(n)).length;
+      return {...j,acertos:ac};
+    }).sort((a,b)=>b.acertos-a.acertos);
+
+    const bc=lot==='lotofacil'?'ball-loto':'ball-mega';
+    const minPremio=lot==='lotofacil'?11:4;
+    meusHTML=`<div style="margin-top:16px;">
+      <div class="card-title">🎮 Meus Jogos neste Concurso</div>
+      ${comAcertos.map((j,i)=>{
+        const premiado=j.acertos>=minPremio;
+        return`<div class="game-row" style="border-color:${premiado?'rgba(22,163,74,.4)':'rgba(37,99,235,.1)'};">
+          <div class="game-row-header">
+            <div style="font-size:12px;color:var(--text2);">Jogo ${i+1} · Σ${j.nums.reduce((a,b)=>a+b,0)}</div>
+            <span class="badge ${premiado?'badge-green':'badge-red'}">${j.acertos} acertos${premiado?' 🏆':''}</span>
+          </div>
+          <div class="balls">${j.nums.map(n=>{
+            const hit=balls.includes(n);
+            return`<div class="ball ${bc} ball-sm" style="${hit?'box-shadow:0 0 0 2px #16a34a;':'opacity:0.5;'}">${String(n).padStart(2,'0')}</div>`;
+          }).join('')}</div>
+          <div class="pbar" style="margin-top:8px;"><div class="pbar-fill" style="width:${Math.round(j.acertos/j.nums.length*100)}%;background:${premiado?'#16a34a':'#ef4444'}"></div></div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  const prox=d.valorEstimadoProximoConcurso||0;
+  document.getElementById('resultado-content').innerHTML=`<div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <h2 style="font-size:17px;font-weight:700;color:var(--text);">${lot==='lotofacil'?'🔵':'🟢'} Concurso ${d.numero}</h2>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--text3);">${d.dataApuracao||''}</span>
+        ${d.acumulado?'<span class="badge badge-yellow">⚡ Acumulou!</span>':''}
+      </div>
+    </div>
+    <div class="card-title">🎱 Números Sorteados</div>
+    <div class="balls">${balls.map(n=>`<div class="ball ball-result">${String(n).padStart(2,'0')}</div>`).join('')}</div>
+    ${premHTML}
+    ${meusHTML}
+    ${prox>0?`<div class="info-box" style="margin-top:12px;">📈 Próximo concurso estimado em <strong>R$ ${prox.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></div>`:''}
+  </div>`;
+}
+
+// =============================================
+// ADMIN PANEL
+// =============================================
+async function loadAdminPanel(){
+  const users=UsersDB.getUsers(),list=Object.entries(users);
+  const ativos=list.filter(([,u])=>u.active&&(u.plan==='admin'||u.plan==='livre'||!u.expiresAt||new Date(u.expiresAt)>new Date())).length;
+  const suspensos=list.filter(([,u])=>!u.active||(u.expiresAt&&new Date(u.expiresAt)<new Date()&&u.plan!=='admin'&&u.plan!=='livre')).length;
+  const mensais=list.filter(([,u])=>u.plan==='mensal'&&u.active&&(!u.expiresAt||new Date(u.expiresAt)>new Date())).length;
+  const anuais=list.filter(([,u])=>u.plan==='anual'&&u.active&&(!u.expiresAt||new Date(u.expiresAt)>new Date())).length;
+  const receita=(mensais*29.90)+(anuais*(197/12));
+  document.getElementById('as-total').textContent=list.length;
+  document.getElementById('as-ativos').textContent=ativos;
+  document.getElementById('as-suspensos').textContent=suspensos;
+  document.getElementById('as-receita').textContent='R$'+receita.toFixed(0);
+  renderAdminUsers();
+}
+function renderAdminUsers(){
+  const users=UsersDB.getUsers(),q=(document.getElementById('adm-search')?.value||'').toLowerCase();
+  const list=Object.entries(users).filter(([u,d])=>!q||u.includes(q)||d.name.toLowerCase().includes(q));
+  document.getElementById('adm-user-count').textContent=`${list.length} usuário(s) encontrado(s)`;
+  const planBadge={admin:'badge-yellow',livre:'badge-purple',mensal:'badge-blue',anual:'badge-green',trial:'badge-purple'};
+  const planLabel={admin:'👑 Admin',livre:'✨ Livre',mensal:'📅 Mensal',anual:'🌟 Anual',trial:'🎁 Trial'};
+  document.getElementById('adm-users-list').innerHTML=list.length?list.map(([u,d])=>{
+    const exp=d.expiresAt?new Date(d.expiresAt):null,now=new Date();
+    const expired=exp&&now>exp&&d.plan!=='admin'&&d.plan!=='livre';
+    const expTxt=d.expiresAt?(expired?`<span style="color:#dc2626;font-weight:600;">Vencido: ${exp.toLocaleDateString('pt-BR')}</span>`:`Vence: ${exp.toLocaleDateString('pt-BR')}`):'Sem expiração';
+    const isSelf=u===currentUser;
+    return`<div class="user-row"><div class="user-avatar">${d.name.charAt(0).toUpperCase()}</div><div class="user-info"><div class="user-name-text">${d.name} <span style="color:#8aa0bc;font-weight:400">@${u}</span>${isSelf?'<span class="badge badge-blue" style="margin-left:6px;">Você</span>':''}</div><div class="user-meta-text">${expTxt} · ${(d.jogos||[]).length} jogos salvos · Cadastro: ${d.createdAt?new Date(d.createdAt).toLocaleDateString('pt-BR'):'—'}</div></div><span class="badge ${planBadge[d.plan]||'badge-blue'}">${planLabel[d.plan]||d.plan}</span><div class="user-actions">${expired||!d.active?`<button class="btn btn-green btn-sm" onclick="adminReativar('${u}')">✅ Reativar</button>`:`<button class="btn btn-danger btn-sm" onclick="adminSuspender('${u}')" ${isSelf?'disabled':''}>🔒 Suspender</button>`}<select class="form-ctrl" style="width:auto;padding:4px 8px;font-size:11px;" onchange="adminMudarPlano('${u}',this.value)"><option ${d.plan==='mensal'?'selected':''} value="mensal">Mensal</option><option ${d.plan==='anual'?'selected':''} value="anual">Anual</option><option ${d.plan==='livre'?'selected':''} value="livre">Livre</option><option ${d.plan==='admin'?'selected':''} value="admin">Admin</option><option ${d.plan==='trial'?'selected':''} value="trial">Trial</option></select>${!isSelf?`<button class="btn btn-danger btn-sm" onclick="adminDeletar('${u}')">🗑️</button>`:''}</div></div>`;
+  }).join(''):'<div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum usuário encontrado</p></div>';
+}
+function adminCriarUsuario(){
+  const name=document.getElementById('adm-name').value.trim();
+  const loginInput=document.getElementById('adm-user').value.trim().toLowerCase();
+  const p=document.getElementById('adm-pass').value;
+  const plan=document.getElementById('adm-plan').value;
+  if(!name||!loginInput||!p){showNotif('Preencha todos os campos.','error');return;}
+  if(p.length<4){showNotif('Senha mínima 4 caracteres.','error');return;}
+  const users=UsersDB.getUsers();
+  // Determine if email or username was given
+  const isEmail=/^[^@]+@[^@]+\.[^@]+$/.test(loginInput);
+  // Use input directly as the key (cleaned)
+  const userKey=loginInput.replace(/[^a-z0-9_.@]/g,'_').substring(0,40);
+  if(users[userKey]){showNotif('Este usuário/e-mail já existe.','error');return;}
+  let expiresAt=null;
+  const dd=new Date();
+  if(plan==='mensal'){dd.setDate(dd.getDate()+30);expiresAt=dd.toISOString();}
+  else if(plan==='anual'){dd.setFullYear(dd.getFullYear()+1);expiresAt=dd.toISOString();}
+  // Store with all possible lookup fields populated
+  users[userKey]={
+    name,
+    pass:btoa(p),
+    role:plan==='admin'?'admin':'user',
+    plan,
+    email:isEmail?loginInput:'',
+    username:!isEmail?loginInput:'',
+    loginId:loginInput,
+    createdAt:new Date().toISOString(),
+    expiresAt,
+    active:true,
+    jogos:[],
+    pendingPlan:null,
+    createdByAdmin:true
+  };
+  UsersDB.saveUsers(users);
+  document.getElementById('adm-name').value='';
+  document.getElementById('adm-user').value='';
+  document.getElementById('adm-pass').value='';
+  showNotif(`✅ "${name}" criado! Login: "${loginInput}" Senha: "${p}"`, 'success');
+  loadAdminPanel();
+}
+function adminReativar(u){
+  const users=UsersDB.getUsers();if(!users[u])return;
+  adminReativarComPlano(u,users[u].plan||'mensal');
+  showNotif(`@${u} reativado! ✅`);loadAdminPanel();
+}
+function adminSuspender(u){
+  if(u===currentUser){showNotif('Você não pode suspender sua própria conta.','error');return;}
+  if(!confirm(`Suspender @${u}?`))return;
+  const users=UsersDB.getUsers();if(!users[u])return;
+  users[u].active=false;UsersDB.saveUsers(users);showNotif(`@${u} suspenso.`,'error');loadAdminPanel();
+}
+function adminMudarPlano(u,plan){
+  adminReativarComPlano(u,plan);
+  showNotif(`Plano atualizado! ✅`);
+  setTimeout(()=>loadAdminPanel(),300);
+}
+function adminDeletar(u){
+  if(u===currentUser){showNotif('Você não pode deletar sua própria conta.','error');return;}
+  if(!confirm(`Deletar @${u} permanentemente? Esta ação não pode ser desfeita.`))return;
+  const users=UsersDB.getUsers();delete users[u];UsersDB.saveUsers(users);showNotif(`@${u} deletado.`,'error');loadAdminPanel();
+}
+
+
+
+// =============================================
+// MEU PLANO + PIX QR CODE
+// =============================================
+function showDashQR(){
+  const ud=currentUserData||UsersDB.getUser(currentUser);
+  const area=document.getElementById('dash-qr-area');
+  if(!area)return;
+  // Show plan selection inline
+  area.innerHTML=`<div style="margin-top:10px;background:#fff;border-radius:12px;padding:14px;border:1px solid rgba(37,99,235,0.15);">
+    <div style="font-size:12px;font-weight:700;color:#4a6080;margin-bottom:10px;">Escolha o plano:</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div class="plan-opt selected" id="dqr-mensal" onclick="selectDashPlan('mensal')" style="padding:10px;text-align:center;cursor:pointer;">
+        <div style="font-weight:700;color:#1a2a4a;font-size:13px;">Mensal</div>
+        <div style="font-size:20px;font-weight:800;color:#2563eb;">R$29,90</div>
+      </div>
+      <div class="plan-opt" id="dqr-anual" onclick="selectDashPlan('anual')" style="padding:10px;text-align:center;cursor:pointer;">
+        <div style="font-weight:700;color:#1a2a4a;font-size:13px;">Anual</div>
+        <div style="font-size:20px;font-weight:800;color:#2563eb;">R$197</div>
+        <div style="font-size:10px;color:#16a34a;">45% off</div>
+      </div>
+    </div>
+    <button class="btn btn-blue" style="width:100%;justify-content:center;" onclick="gerarQRDash()">📲 Gerar QR Code PIX</button>
+    <div id="dash-qr-result" style="margin-top:12px;"></div>
+  </div>`;
+  window._dashPlan='mensal';
+}
+
+function selectDashPlan(p){
+  window._dashPlan=p;
+  document.getElementById('dqr-mensal')?.classList.toggle('selected',p==='mensal');
+  document.getElementById('dqr-anual')?.classList.toggle('selected',p==='anual');
+}
+
+function gerarQRDash(){
+  const plan=window._dashPlan||'mensal';
+  const valor=plan==='mensal'?29.90:197.00;
+  const ud=currentUserData||UsersDB.getUser(currentUser);
+  const nome=(ud?.name||'Cliente').split(' ')[0];
+  const pixKey='2264bb61-2de7-4aa2-af8c-3c71ae28077c'; // Chave PIX Tiago
+  const desc=('AsorteP'+plan.substring(0,3)+nome).substring(0,25);
+  const payload=buildPixPayload(pixKey,valor,desc,'Tiago Souza','Ribeirao Preto');
+  const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payload)}`;
+  const valorStr=valor.toFixed(2).replace('.',',');
+  const res=document.getElementById('dash-qr-result');
+  if(!res)return;
+  res.innerHTML=`<div style="text-align:center;">
+    <img src="${qrUrl}" style="width:180px;height:180px;border-radius:8px;border:2px solid rgba(37,99,235,0.15);" onerror="this.style.display='none'">
+    <div style="font-size:12px;color:#4a6080;margin:8px 0 4px;">Valor: <strong style="color:#1a2a4a;">R$ ${valorStr}</strong> · ${plan==='mensal'?'Mensal':'Anual'}</div>
+    <button class="btn btn-outline btn-sm" onclick="copiarCodigoPix('${payload.replace(/'/g,"\'")}')">📋 Copiar código Copia e Cola</button>
+  </div>`;
+  // Notify admin
+  if(ud){
+    UsersDB.addNotification({type:'payment_request',title:'💳 Solicitação de pagamento!',
+      msg:`${ud.name} (@${currentUser}) solicitou plano ${plan} — R$ ${valorStr}`,
+      user:currentUser,plan,valor,userName:ud.name,userEmail:ud.email||'—'});
+    const users=UsersDB.getUsers();
+    if(users[currentUser]){users[currentUser].pendingPlan=plan;UsersDB.saveUsers(users);}
+  }
+}
+
+// =============================================
+// MEUS JOGOS
+// =============================================
+
+// Cache de resultados já conferidos
+let _resultadosCache = {};
+
+async function loadMeusJogos(){
+  renderMeusJogosFilters();
+  await conferirTodosJogos();
+  renderMeusJogos();
+}
+
+function renderMeusJogosFilters(){
+  const jogos = getUserJogos();
+  const datas = [...new Set(jogos.map(j=>j.data))];
+  const sel = document.getElementById('mj-filtro-data');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">📅 Todas as datas</option>';
+  datas.forEach(d => sel.innerHTML += `<option value="${d}" ${d===cur?'selected':''}>${d}</option>`);
+}
+
+async function conferirTodosJogos(){
+  const jogos = getUserJogos();
+  // Get unique loterias + concursos needed
+  const needed = {};
+  jogos.forEach(j => {
+    if(j.concurso && !_resultadosCache[j.lot+'_'+j.concurso]){
+      if(!needed[j.lot]) needed[j.lot] = new Set();
+      needed[j.lot].add(j.concurso);
+    }
+  });
+  // Fetch missing results
+  for(const lot of Object.keys(needed)){
+    for(const concurso of needed[lot]){
+      try{
+        const d = await fetchLoteria(lot, concurso);
+        const balls = (d.dezenasSorteadasOrdemSorteio||d.listaDezenas||[]).map(n=>parseInt(n));
+        _resultadosCache[lot+'_'+concurso] = balls;
+      }catch(e){}
+    }
+  }
+}
+
+function calcAcertos(nums, resultado){
+  if(!resultado||!resultado.length) return null;
+  return nums.filter(n => resultado.includes(n)).length;
+}
+
+function premioLabel(lot, acertos){
+  if(acertos === null) return null;
+  if(lot === 'lotofacil'){
+    if(acertos >= 15) return {label:'🏆 Sena!', cls:'badge-green', pts:acertos};
+    if(acertos >= 14) return {label:'🥇 14 pts', cls:'badge-green', pts:acertos};
+    if(acertos >= 13) return {label:'🥈 13 pts', cls:'badge-blue', pts:acertos};
+    if(acertos >= 12) return {label:'🥉 12 pts', cls:'badge-blue', pts:acertos};
+    if(acertos >= 11) return {label:'✅ 11 pts', cls:'badge-blue', pts:acertos};
+    return {label:`❌ ${acertos} pts`, cls:'badge-red', pts:acertos};
+  } else {
+    if(acertos >= 6) return {label:'🏆 Sena!', cls:'badge-green', pts:acertos};
+    if(acertos >= 5) return {label:'🥇 Quina', cls:'badge-green', pts:acertos};
+    if(acertos >= 4) return {label:'🥈 Quadra', cls:'badge-blue', pts:acertos};
+    return {label:`❌ ${acertos} acertos`, cls:'badge-red', pts:acertos};
+  }
+}
+
+function renderMeusJogos(){
+  const el = document.getElementById('mj-content');
+  const stats = document.getElementById('mj-stats');
+  if(!el) return;
+
+  const filtData = document.getElementById('mj-filtro-data')?.value||'';
+  const filtLot  = document.getElementById('mj-filtro-lot')?.value||'';
+  const filtPrem = document.getElementById('mj-filtro-premio')?.value||'';
+
+  let jogos = [...getUserJogos()].reverse();
+  if(filtData) jogos = jogos.filter(j=>j.data===filtData);
+  if(filtLot)  jogos = jogos.filter(j=>j.lot===filtLot);
+
+  // Enrich with results
+  const enriched = jogos.map(j => {
+    const res = j.concurso ? _resultadosCache[j.lot+'_'+j.concurso] : null;
+    const acertos = calcAcertos(j.nums, res);
+    const premio = premioLabel(j.lot, acertos);
+    return {...j, res, acertos, premio};
+  });
+
+  // Apply prize filter
+  let filtered = enriched;
+  if(filtPrem === 'premiados')    filtered = enriched.filter(j=>j.acertos!==null&&j.acertos>=(j.lot==='lotofacil'?11:4));
+  if(filtPrem === 'nao_premiados') filtered = enriched.filter(j=>j.acertos!==null&&j.acertos<(j.lot==='lotofacil'?11:4));
+  if(filtPrem === 'sem_resultado') filtered = enriched.filter(j=>j.acertos===null);
+
+  // Stats
+  const total = enriched.length;
+  const comPremio = enriched.filter(j=>j.acertos!==null&&j.acertos>=(j.lot==='lotofacil'?11:4)).length;
+  const semRes = enriched.filter(j=>j.acertos===null).length;
+  stats.innerHTML = `
+    <div class="stat-card" style="flex:1;min-width:120px;text-align:center;">
+      <div class="stat-val">${total}</div><div class="stat-sub">Jogos salvos</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:120px;text-align:center;">
+      <div class="stat-val" style="color:#16a34a;">${comPremio}</div><div class="stat-sub">Com prêmio</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:120px;text-align:center;">
+      <div class="stat-val" style="color:#8aa0bc;">${semRes}</div><div class="stat-sub">Sem resultado</div>
+    </div>`;
+
+  if(!filtered.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🎮</div><p>Nenhum jogo encontrado</p></div>';
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  filtered.forEach(j=>{
+    if(!groups[j.data]) groups[j.data]=[];
+    groups[j.data].push(j);
+  });
+
+  el.innerHTML = Object.entries(groups).map(([date,items])=>`
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+        <span>📅 ${date} · ${items.length} jogo(s)</span>
+        <div style="display:flex;gap:5px;">
+          <button class="btn btn-outline btn-sm" onclick="copiarGrupoDataMJ('${date}')">📋</button>
+          <button class="btn btn-outline btn-sm" onclick="exportarPDFDataMJ('${date}')">📄</button>
+        </div>
+      </div>
+      ${items.map(j=>{
+        const bc=j.lot==='lotofacil'?'ball-loto':'ball-mega';
+        const ln=j.lot==='lotofacil'?'🔵 Lotofácil':'🟢 Mega-Sena';
+        const premBadge = j.premio ? `<span class="badge ${j.premio.cls}">${j.premio.label}</span>` : '<span class="badge badge-blue">⏳ Sem resultado</span>';
+        const concursoInfo = j.concurso ? `· Concurso ${j.concurso}` : '';
+        const acertosBar = j.acertos!==null ? `
+          <div style="margin-top:8px;">
+            <div style="font-size:11px;color:#4a6080;margin-bottom:4px;">Acertos: ${j.acertos} de ${j.nums.length}</div>
+            <div class="pbar"><div class="pbar-fill" style="width:${Math.round(j.acertos/j.nums.length*100)}%;background:${j.acertos>=(j.lot==='lotofacil'?11:4)?'#16a34a':'#ef4444'}"></div></div>
+          </div>` : '';
+        return `<div class="game-row">
+          <div class="game-row-header">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:var(--text3);">${ln} ${concursoInfo}</span>
+              ${premBadge}
+            </div>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-outline btn-sm" onclick="copiarJogoSalvo(${JSON.stringify(j.nums)},'${j.data}','${j.lot}')">📋</button>
+              <button class="btn btn-outline btn-sm" onclick="exportarPDFJogoUnico(${JSON.stringify(j.nums)},'${j.data}','${j.lot}')">📄</button>
+              <button class="btn btn-danger btn-sm" onclick="deletarJogoMJ(${j.id})">🗑️</button>
+            </div>
+          </div>
+          <div class="balls">
+            ${j.nums.map(n=>{
+              const acertou = j.res && j.res.includes(n);
+              return `<div class="ball ${bc} ball-sm" style="${acertou?'box-shadow:0 0 0 2px #16a34a,0 0 8px rgba(22,163,74,0.5);':'opacity:0.6'}">${String(n).padStart(2,'0')}</div>`;
+            }).join('')}
+          </div>
+          ${acertosBar}
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function deletarJogoMJ(id){
+  const jogos = getUserJogos().filter(j=>j.id!==id);
+  setUserJogos(jogos);
+  renderMeusJogosFilters();
+  renderMeusJogos();
+  showNotif('Jogo removido.','error');
+}
+
+async function limparMeusJogos(){
+  if(!confirm('Remover TODOS os jogos salvos? Esta ação não pode ser desfeita.')) return;
+  setUserJogos([]);
+  renderMeusJogosFilters();
+  renderMeusJogos();
+  showNotif('Todos os jogos removidos.','error');
+}
+
+function copiarMeusJogos(){
+  const filtData = document.getElementById('mj-filtro-data')?.value||'';
+  const filtLot  = document.getElementById('mj-filtro-lot')?.value||'';
+  let jogos = getUserJogos();
+  if(filtData) jogos = jogos.filter(j=>j.data===filtData);
+  if(filtLot)  jogos = jogos.filter(j=>j.lot===filtLot);
+  if(!jogos.length){showNotif('Nenhum jogo para copiar.','error');return;}
+  const lines = ['=== Área da Sorte — Meus Jogos ===',''];
+  jogos.forEach((j,i)=>{
+    const res = j.concurso?_resultadosCache[j.lot+'_'+j.concurso]:null;
+    const ac = calcAcertos(j.nums,res);
+    lines.push(`Jogo ${i+1} [${j.lot==='lotofacil'?'Lotofácil':'Mega-Sena'} · ${j.data}]: ${j.nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.nums.reduce((a,b)=>a+b,0)}${ac!==null?' | '+ac+' acertos':''}`);
+  });
+  navigator.clipboard.writeText(lines.join('
+')).then(()=>showNotif(jogos.length+' jogos copiados! 📋')).catch(()=>showNotif('Erro','error'));
+}
+
+function copiarGrupoDataMJ(date){
+  const jogos = getUserJogos().filter(j=>j.data===date);
+  const lines = [`=== Área da Sorte · ${date} ===`,''];
+  jogos.forEach((j,i)=>{
+    const res = j.concurso?_resultadosCache[j.lot+'_'+j.concurso]:null;
+    const ac = calcAcertos(j.nums,res);
+    lines.push(`Jogo ${i+1}: ${j.nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.nums.reduce((a,b)=>a+b,0)}${ac!==null?' | '+ac+' acertos':''}`);
+  });
+  navigator.clipboard.writeText(lines.join('
+')).then(()=>showNotif('Copiado! 📋')).catch(()=>showNotif('Erro','error'));
+}
+
+function exportarPDFMeusJogos(){
+  const filtData = document.getElementById('mj-filtro-data')?.value||'';
+  const filtLot  = document.getElementById('mj-filtro-lot')?.value||'';
+  let jogos = getUserJogos();
+  if(filtData) jogos = jogos.filter(j=>j.data===filtData);
+  if(filtLot)  jogos = jogos.filter(j=>j.lot===filtLot);
+  if(!jogos.length){showNotif('Nenhum jogo.','error');return;}
+  const enriched = jogos.map(j=>{
+    const res = j.concurso?_resultadosCache[j.lot+'_'+j.concurso]:null;
+    return {...j, acertos:calcAcertos(j.nums,res)};
+  });
+  buildPDFMeusJogos(enriched,'Área da Sorte — Meus Jogos',jogos.length+' jogo(s)');
+}
+
+function exportarPDFDataMJ(date){
+  const jogos = getUserJogos().filter(j=>j.data===date);
+  const enriched = jogos.map(j=>{
+    const res = j.concurso?_resultadosCache[j.lot+'_'+j.concurso]:null;
+    return {...j, acertos:calcAcertos(j.nums,res)};
+  });
+  buildPDFMeusJogos(enriched,`Área da Sorte · ${date}`,jogos.length+' jogo(s)');
+}
+
+function buildPDFMeusJogos(jogos,titulo,sub){
+  const data = new Date().toLocaleDateString('pt-BR');
+  const rows = jogos.map((j,i)=>{
+    const bc = j.lot==='lotofacil'?'#2563eb':'#16a34a';
+    const ln = j.lot==='lotofacil'?'Lotofácil':'Mega-Sena';
+    const acStr = j.acertos!==null?`<span style="color:${j.acertos>=(j.lot==='lotofacil'?11:4)?'#16a34a':'#ef4444'};font-weight:700;">${j.acertos} acertos</span>`:'—';
+    return `<tr style="border-bottom:1px solid #e8eef5">
+      <td style="padding:7px 6px;font-weight:600;color:#4a6080;font-size:12px;">Jogo ${i+1}</td>
+      <td style="padding:7px 6px;font-size:11px;color:#8aa0bc;">${ln}<br>${j.data||''}</td>
+      <td style="padding:7px 6px;">${j.nums.map(n=>`<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:${bc};color:#fff;border-radius:50%;font-size:9px;font-weight:700;margin:1px;">${String(n).padStart(2,'0')}</span>`).join('')}</td>
+      <td style="padding:7px 6px;font-size:12px;">Σ${j.nums.reduce((a,b)=>a+b,0)}</td>
+      <td style="padding:7px 6px;font-size:12px;">${acStr}</td>
+    </tr>`;
+  }).join('');
+  const htmlPDF = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo}</title>
+  <style>body{font-family:Arial,sans-serif;background:#f0f4f8;margin:0;padding:16px}.c{max-width:760px;margin:0 auto;background:#fff;border-radius:14px;padding:26px;box-shadow:0 4px 24px rgba(30,80,180,.10)}.h{display:flex;align-items:center;gap:12px;border-bottom:2px solid #e8eef5;padding-bottom:14px;margin-bottom:18px}.logo{width:40px;height:40px;background:linear-gradient(135deg,#1a56c4,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}h1{font-size:16px;color:#1a2a4a;margin:0 0 2px}.sub{font-size:11px;color:#4a6080}table{width:100%;border-collapse:collapse}thead tr{background:#f0f4f8}th{padding:8px 6px;text-align:left;font-size:9px;color:#8aa0bc;text-transform:uppercase;letter-spacing:.5px}.f{margin-top:16px;padding-top:12px;border-top:1px solid #e8eef5;font-size:10px;color:#8aa0bc;text-align:center}@media print{body{background:#fff;padding:0}.c{box-shadow:none;border-radius:0}}</style></head>
+  <body><div class="c"><div class="h"><div class="logo"><svg width="22" height="22" viewBox="0 0 28 28" fill="none"><path d="M14 3L16.5 10.5H24.5L18.2 15.1L20.7 22.6L14 18L7.3 22.6L9.8 15.1L3.5 10.5H11.5L14 3Z" fill="white"/></svg></div><div><h1>${titulo}</h1><div class="sub">${sub} · Exportado em ${data}</div></div></div>
+  <table><thead><tr><th>Nº</th><th>Loteria</th><th>Dezenas</th><th>Soma</th><th>Resultado</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="f">Área da Sorte · Sistema de Loterias · ${data}</div></div>
+  <scr`+'ipt>window.onload=()=>window.print()</scr'+'ipt></body></html>';
+  const b=new Blob([htmlPDF],{type:'text/html'}),url=URL.createObjectURL(b),w=window.open(url,'_blank');
+  if(!w){showNotif('Permita pop-ups para PDF.','error');return;}
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+  showNotif('PDF pronto! Use Ctrl+P para salvar 📄');
+}
+
+function loadMeuPlano(){
+  const ud=currentUserData||UsersDB.getUser(currentUser);
+  if(!ud){return;}
+  const el=document.getElementById('meuplano-content');
+  const isAdmin=ud.role==='admin'||ud.plan==='admin';
+  const isLivre=ud.plan==='livre';
+  if(isAdmin){el.innerHTML=`<div class="success-box" style="font-size:15px;font-weight:600;">👑 Você é administrador do sistema. Acesso ilimitado.</div>`;return;}
+  if(isLivre){el.innerHTML=`<div class="success-box" style="font-size:15px;font-weight:600;">✨ Você tem acesso livre (sem expiração).</div>`;return;}
+  const exp=ud.expiresAt?new Date(ud.expiresAt):null;
+  const now=new Date();
+  const days=exp?Math.ceil((exp-now)/86400000):null;
+  const expired=exp&&now>exp;
+  const planLabels={trial:'🎁 Trial gratuito',mensal:'📅 Mensal',anual:'🌟 Anual'};
+
+  // Status card
+  let statusHTML='';
+  if(expired){
+    statusHTML=`<div class="warn-box" style="margin-bottom:16px;font-size:13px;">⚠️ Seu plano venceu em ${exp.toLocaleDateString('pt-BR')}. Renove para continuar.</div>`;
+  } else if(days!==null&&days<=7){
+    statusHTML=`<div class="warn-box" style="margin-bottom:16px;font-size:13px;">⏰ Seu plano vence em ${days} dia(s) (${exp.toLocaleDateString('pt-BR')}). Renove agora!</div>`;
+  } else if(exp){
+    statusHTML=`<div class="success-box" style="margin-bottom:16px;">✅ Plano ativo até ${exp.toLocaleDateString('pt-BR')}</div>`;
+  }
+
+  el.innerHTML=`
+    <div style="max-width:600px;">
+      ${statusHTML}
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">📋 Plano Atual</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:#1a2a4a;">${planLabels[ud.plan]||ud.plan}</div>
+            <div style="font-size:13px;color:#8aa0bc;margin-top:4px;">
+              ${exp?`Válido até: ${exp.toLocaleDateString('pt-BR')}`:'Sem expiração'}
+            </div>
+            ${ud.email?`<div style="font-size:12px;color:#8aa0bc;margin-top:2px;">📧 ${ud.email}</div>`:''}
+          </div>
+          <span class="badge ${expired?'badge-red':'badge-green'}">${expired?'Vencido':'Ativo'}</span>
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-bottom:12px;">💳 Escolha seu plano</div>
+      <div class="plan-opts" style="margin-bottom:16px;">
+        <div class="plan-opt selected" id="pp-mensal" onclick="selectPayPlan('mensal')">
+          <div class="po-name">Mensal</div>
+          <div class="po-price">R$29,90</div>
+          <div class="po-sub">por mês</div>
+          <div style="font-size:10px;color:#8aa0bc;margin-top:4px;">Renovação mensal</div>
+        </div>
+        <div class="plan-opt" id="pp-anual" onclick="selectPayPlan('anual')">
+          <div class="po-name">Anual</div>
+          <div class="po-price">R$197</div>
+          <div class="po-sub">R$16,42/mês</div>
+          <div style="font-size:10px;color:#16a34a;margin-top:4px;">✨ Economize 45%</div>
+        </div>
+      </div>
+
+      <button class="btn btn-blue" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="gerarQRCode()">
+        📲 Gerar QR Code para Pagamento
+      </button>
+      <div id="qrcode-area" style="display:none;margin-top:20px;"></div>
+    </div>`;
+  window._selectedPayPlan='mensal';
+}
+
+function selectPayPlan(p){
+  window._selectedPayPlan=p;
+  document.getElementById('pp-mensal').classList.toggle('selected',p==='mensal');
+  document.getElementById('pp-anual').classList.toggle('selected',p==='anual');
+}
+
+function gerarQRCode(){
+  const plan=window._selectedPayPlan||'mensal';
+  const valor=plan==='mensal'?29.90:197.00;
+  const valorStr=valor.toFixed(2).replace('.',',');
+  const ud=currentUserData||UsersDB.getUser(currentUser);
+  const nome=ud.name.split(' ')[0];
+  const planLabel=plan==='mensal'?'Mensal':'Anual';
+
+  // PIX payload (EMV format)
+  const pixKey='2264bb61-2de7-4aa2-af8c-3c71ae28077c'; // Chave PIX Tiago
+  const desc=`AreaSorte ${planLabel} ${nome}`.substring(0,25);
+  const payload=buildPixPayload(pixKey,valor,desc,'Tiago Souza','Ribeirao Preto');
+
+  // Notify admin
+  UsersDB.addNotification({
+    type:'payment_request',
+    title:'💳 Solicitação de pagamento!',
+    msg:`${ud.name} (${ud.email||'—'}) solicitou o plano ${planLabel} — R$ ${valorStr}`,
+    user:currentUser,
+    plan:plan,
+    valor:valor,
+    userName:ud.name,
+    userEmail:ud.email||'—'
+  });
+
+  // Register pending plan on user
+  const users=UsersDB.getUsers();
+  if(users[currentUser]){users[currentUser].pendingPlan=plan;UsersDB.saveUsers(users);}
+
+  const area=document.getElementById('qrcode-area');
+  area.style.display='block';
+  area.innerHTML=`
+    <div class="card" style="text-align:center;">
+      <div class="card-title" style="justify-content:center;">📲 QR Code PIX — R$ ${valorStr}</div>
+      <div style="background:#fff;padding:16px;border-radius:12px;display:inline-block;border:2px solid rgba(37,99,235,0.15);margin:10px 0;">
+        <div id="qr-img"></div>
+      </div>
+      <div class="pix-box" style="text-align:left;margin:12px 0;">
+        <div style="font-size:11px;color:#4a6080;margin-bottom:4px;">Chave PIX</div>
+        <div style="font-size:14px;font-weight:700;color:#2563eb;">2264bb61-2de7-4aa2-af8c-3c71ae28077c</div>
+        <div style="font-size:11px;color:#4a6080;margin-top:6px;">Valor: <strong style="color:#1a2a4a;">R$ ${valorStr}</strong></div>
+        <div style="font-size:11px;color:#4a6080;margin-top:2px;">Plano: <strong style="color:#1a2a4a;">${planLabel}</strong></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <button class="btn btn-outline" onclick="copiarCodigoPix('${payload.replace(/'/g,"\'")}')">📋 Copiar código PIX Copia e Cola</button>
+      </div>
+      <div class="info-box" style="text-align:left;font-size:12px;">
+        ✅ Após o pagamento, o administrador irá liberar seu acesso em até <strong>24h</strong>.<br>
+        📧 Em caso de dúvidas: 2264bb61-2de7-4aa2-af8c-3c71ae28077c
+      </div>
+    </div>`;
+
+  // Generate QR using free API
+  const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
+  document.getElementById('qr-img').innerHTML=`<img src="${qrUrl}" alt="QR Code PIX" style="width:200px;height:200px;border-radius:8px;" onerror="this.parentNode.innerHTML='<div style=\"padding:20px;color:#8aa0bc;font-size:12px;\">Imagem indisponível.<br>Use o código Copia e Cola abaixo.</div>'">`;
+  area.scrollIntoView({behavior:'smooth'});
+}
+
+function copiarCodigoPix(payload){
+  navigator.clipboard.writeText(payload).then(()=>showNotif('Código PIX copiado! Cole no seu banco. ✅')).catch(()=>showNotif('Erro ao copiar. Use o botão copiar do seu navegador.','error'));
+}
+
+// EMV PIX Payload builder
+function buildPixPayload(key,value,desc,merchant,city){
+  function tlv(id,val){const s=String(val);return id+String(s.length).padStart(2,'0')+s;}
+  const pix=tlv('00','01')+tlv('01','12')+tlv('26',tlv('00','br.gov.bcb.pix')+tlv('01',key));
+  const amount=value.toFixed(2);
+  let pay=tlv('00','01')+pix+tlv('52','0000')+tlv('53','986')+tlv('54',amount)+tlv('58','BR')+tlv('59',merchant.substring(0,25))+tlv('60',city.substring(0,15))+tlv('62',tlv('05',desc.substring(0,25)));
+  pay+=tlv('63',crc16(pay+'6304'));
+  return pay;
+}
+function crc16(str){
+  let crc=0xFFFF;
+  for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){crc=(crc&0x8000)?(crc<<1)^0x1021:(crc<<1);}}
+  return(crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0');
+}
+
+// =============================================
+// ADMIN PANEL — IMPROVED
+// =============================================
+function loadAdminPanel(){
+  const users=UsersDB.getUsers(),list=Object.entries(users);
+  // Count only non-admin paying users
+  const payingActive=list.filter(([,u])=>u.active&&u.plan!=='admin'&&u.plan!=='livre'&&(!u.expiresAt||new Date(u.expiresAt)>new Date()));
+  const mensais=payingActive.filter(([,u])=>u.plan==='mensal').length;
+  const anuais=payingActive.filter(([,u])=>u.plan==='anual').length;
+  const ativos=payingActive.length;
+  const trials=list.filter(([,u])=>u.plan==='trial'&&(!u.expiresAt||new Date(u.expiresAt)>new Date())).length;
+  const suspensos=list.filter(([,u])=>!u.active||(u.expiresAt&&new Date(u.expiresAt)<new Date()&&u.plan!=='admin'&&u.plan!=='livre')).length;
+  const receita=(mensais*29.90)+(anuais*(197/12));
+  document.getElementById('as-total').textContent=list.length;
+  document.getElementById('as-ativos').textContent=ativos+' + '+trials+'T';
+  document.getElementById('as-suspensos').textContent=suspensos;
+  document.getElementById('as-receita').textContent='R$'+receita.toFixed(0);
+  loadAdminNotifications();
+  renderAdminUsers();
+}
+
+function loadAdminNotifications(){
+  const notifs=UsersDB.getNotifications();
+  const unread=notifs.filter(n=>!n.read).length;
+  const title=document.querySelector('#page-admin .page-header h1');
+  if(title)title.innerHTML=`👑 Painel Admin ${unread>0?`<span class="badge badge-red" style="font-size:13px;margin-left:8px;">${unread} novo(s)</span>`:''}`;
+
+  // Find or create notifications section
+  let ns=document.getElementById('admin-notifs-section');
+  if(!ns){
+    const adminPage=document.getElementById('page-admin');
+    ns=document.createElement('div');
+    ns.id='admin-notifs-section';
+    ns.style.marginBottom='18px';
+    adminPage.insertBefore(ns,adminPage.querySelector('.grid4'));
+  }
+  if(!notifs.length){ns.innerHTML='';return;}
+  const recent=notifs.slice(0,5);
+  ns.innerHTML=`<div class="card" style="margin-bottom:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div class="card-title" style="margin-bottom:0;">🔔 Notificações ${unread>0?`<span class="badge badge-red">${unread}</span>`:''}</div>
+      <button class="btn btn-outline btn-sm" onclick="UsersDB.clearNotifications();loadAdminPanel()">Limpar tudo</button>
+    </div>
+    ${recent.map(n=>`<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(37,99,235,0.07);align-items:flex-start;" onclick="UsersDB.markNotifRead(${n.id});this.style.opacity='.6'">
+      <div style="font-size:20px;flex-shrink:0;">${n.type==='payment_request'?'💳':n.type==='new_user'?'👤':'🔔'}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:#1a2a4a;">${n.title} ${!n.read?'<span class="badge badge-blue">Novo</span>':''}</div>
+        <div style="font-size:12px;color:#4a6080;margin-top:2px;">${n.msg}</div>
+        <div style="font-size:10px;color:#8aa0bc;margin-top:3px;">${new Date(n.time).toLocaleString('pt-BR')}</div>
+        ${n.type==='payment_request'?`<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-green btn-sm" onclick="event.stopPropagation();adminLiberarPagamento('${n.user}','${n.plan}')">✅ Liberar ${n.plan==='mensal'?'Mensal':'Anual'}</button></div>`:''}
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function adminLiberarPagamento(userKey,plan){
+  adminReativarComPlano(userKey,plan);
+  showNotif(`Acesso liberado para @${userKey} — plano ${plan}! ✅`);
+  loadAdminPanel();
+}
+
+function renderAdminUsers(){
+  const users=UsersDB.getUsers(),q=(document.getElementById('adm-search')?.value||'').toLowerCase();
+  const list=Object.entries(users).filter(([u,d])=>!q||u.includes(q)||d.name.toLowerCase().includes(q)||(d.email&&d.email.includes(q)));
+  document.getElementById('adm-user-count').textContent=`${list.length} usuário(s) encontrado(s)`;
+  const planBadge={admin:'badge-yellow',livre:'badge-purple',mensal:'badge-blue',anual:'badge-green',trial:'badge-purple'};
+  const planLabel={admin:'👑 Admin',livre:'✨ Livre',mensal:'📅 Mensal',anual:'🌟 Anual',trial:'🎁 Trial'};
+  document.getElementById('adm-users-list').innerHTML=list.length?list.map(([u,d])=>{
+    const exp=d.expiresAt?new Date(d.expiresAt):null,now=new Date();
+    const expired=exp&&now>exp&&d.plan!=='admin'&&d.plan!=='livre';
+    const expTxt=d.expiresAt?(expired?`<span style="color:#dc2626;font-weight:600;">Vencido: ${exp.toLocaleDateString('pt-BR')}</span>`:`Vence: ${exp.toLocaleDateString('pt-BR')}`):'Sem expiração';
+    const isSelf=u===currentUser;
+    const hasPending=d.pendingPlan?`<span class="badge badge-yellow" style="margin-left:4px;">Pgto pendente: ${d.pendingPlan}</span>`:'';
+    return`<div class="user-row">
+      <div class="user-avatar">${d.name.charAt(0).toUpperCase()}</div>
+      <div class="user-info">
+        <div class="user-name-text">${d.name} ${isSelf?'<span class="badge badge-blue">Você</span>':''} ${hasPending}</div>
+        <div class="user-meta-text">Login: <strong>${d.loginId||d.username||d.email||'—'}</strong> · ${d.email?'📧 '+d.email:''}</div>
+        <div class="user-meta-text">${expTxt}</div>
+        <div class="user-meta-text">${(d.jogos||[]).length} jogos · Cadastro: ${d.createdAt?new Date(d.createdAt).toLocaleDateString('pt-BR'):'—'}</div>
+      </div>
+      <span class="badge ${planBadge[d.plan]||'badge-blue'}">${planLabel[d.plan]||d.plan}</span>
+      <div class="user-actions">
+        ${expired||!d.active
+          ?`<button class="btn btn-green btn-sm" onclick="adminLiberarAcesso('${u}')">✅ Liberar</button>`
+          :`<button class="btn btn-danger btn-sm" onclick="adminSuspender('${u}')" ${isSelf?'disabled':''}>🔒 Suspender</button>`
+        }
+        <select class="form-ctrl" style="width:auto;padding:4px 8px;font-size:11px;" onchange="adminMudarPlano('${u}',this.value)">
+          <option ${d.plan==='mensal'?'selected':''} value="mensal">Mensal</option>
+          <option ${d.plan==='anual'?'selected':''} value="anual">Anual</option>
+          <option ${d.plan==='livre'?'selected':''} value="livre">Livre</option>
+          <option ${d.plan==='admin'?'selected':''} value="admin">Admin</option>
+          <option ${d.plan==='trial'?'selected':''} value="trial">Trial</option>
+        </select>
+        ${!isSelf?`<button class="btn btn-danger btn-sm" onclick="adminDeletar('${u}')">🗑️</button>`:''}
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum usuário encontrado</p></div>';
+}
+
+function adminLiberarAcesso(u){
+  // Show modal-like inline prompt
+  const users=UsersDB.getUsers();if(!users[u])return;
+  const planAtual=users[u].pendingPlan||users[u].plan||'mensal';
+  const plan=prompt(`Plano para liberar (mensal/anual/livre):\nPlano pendente: ${planAtual}`,planAtual)||planAtual;
+  adminReativarComPlano(u,plan);
+  showNotif(`Acesso de @${u} liberado como ${plan}! ✅`);
+  loadAdminPanel();
+}
+
+function adminReativarComPlano(u,plan){
+  const users=UsersDB.getUsers();if(!users[u])return;
+  users[u].active=true;users[u].plan=plan;users[u].pendingPlan=null;
+  const d=new Date();
+  if(plan==='mensal')d.setDate(d.getDate()+30);
+  else if(plan==='anual')d.setFullYear(d.getFullYear()+1);
+  if(plan!=='admin'&&plan!=='livre')users[u].expiresAt=d.toISOString();
+  else users[u].expiresAt=null;
+  UsersDB.saveUsers(users);
+}
+
+
+// ── ANTI-COPY / RIGHT-CLICK PROTECTION ──
+document.addEventListener('contextmenu', e => {
+  // Allow right-click inside inputs
+  if (!['INPUT','TEXTAREA'].includes(e.target.tagName)) {
+    e.preventDefault();
+  }
+});
+document.addEventListener('copy', e => {
+  // Allow copy inside inputs
+  if (!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) {
+    e.preventDefault();
+  }
+});
+document.addEventListener('cut', e => {
+  if (!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) {
+    e.preventDefault();
+  }
+});
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  const inInput = ['INPUT','TEXTAREA'].includes(tag);
+  // Block Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+S, Ctrl+P outside inputs
+  if (e.ctrlKey || e.metaKey) {
+    if (!inInput && ['c','x','u','s'].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+    }
+    // Always block Ctrl+P (print)
+    if (e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+    }
+  }
+  // Block F12 devtools
+  if (e.key === 'F12') {
+    e.preventDefault();
+  }
+});
+document.addEventListener('selectstart', e => {
+  if (!['INPUT','TEXTAREA'].includes(e.target.tagName)) {
+    e.preventDefault();
+  }
+});
+document.addEventListener('dragstart', e => {
+  e.preventDefault();
+});
+
+</script>
+</body>
+</html>
