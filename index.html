@@ -1900,8 +1900,7 @@ function copiarMeusJogos(){
     const ac = calcAcertos(j.nums,res);
     lines.push(`Jogo ${i+1} [${j.lot==='lotofacil'?'Lotofácil':'Mega-Sena'} · ${j.data}]: ${j.nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.nums.reduce((a,b)=>a+b,0)}${ac!==null?' | '+ac+' acertos':''}`);
   });
-  navigator.clipboard.writeText(lines.join('
-')).then(()=>showNotif(jogos.length+' jogos copiados! 📋')).catch(()=>showNotif('Erro','error'));
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>showNotif(jogos.length+' jogos copiados! 📋')).catch(()=>showNotif('Erro','error'));
 }
 
 function copiarGrupoDataMJ(date){
@@ -1912,8 +1911,7 @@ function copiarGrupoDataMJ(date){
     const ac = calcAcertos(j.nums,res);
     lines.push(`Jogo ${i+1}: ${j.nums.map(n=>String(n).padStart(2,'0')).join(' - ')} | Σ${j.nums.reduce((a,b)=>a+b,0)}${ac!==null?' | '+ac+' acertos':''}`);
   });
-  navigator.clipboard.writeText(lines.join('
-')).then(()=>showNotif('Copiado! 📋')).catch(()=>showNotif('Erro','error'));
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>showNotif('Copiado! 📋')).catch(()=>showNotif('Erro','error'));
 }
 
 function exportarPDFMeusJogos(){
