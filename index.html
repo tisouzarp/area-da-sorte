@@ -310,6 +310,9 @@ input, textarea {
 @media print {
   body { display: none !important; }
 }
+
+/* COPYRIGHT */
+.cpfooter{text-align:center;font-size:11px;color:var(--text3);padding:20px 16px 28px;border-top:1px solid var(--border);margin-top:28px;}
 </style>
 </head>
 <body>
@@ -430,9 +433,6 @@ input, textarea {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Resultados
   </div>
   <div class="nav-item" id="nav-meusjogos" onclick="navTo('meusjogos')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Meus Jogos
-  </div>
-  <div class="nav-item" id="nav-meusjogos" onclick="navTo('meusjogos')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg>Meus Jogos
   </div>
   <div class="nav-item" id="nav-meuplano" onclick="navTo('meuplano')">
@@ -462,6 +462,11 @@ input, textarea {
     <div class="tool-card" onclick="navTo('combinacoes')"><div class="tc-icon" style="background:rgba(234,179,8,.10)">🔗</div><h3>Combinações</h3><p>Pares e padrões</p></div>
   </div>
 </div>
+<div class="cpfooter">Copyright &copy; 2026 Tiago Souza. Todos os direitos reservados.
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">
+  Copyright © 2026 Tiago Souza. Todos os direitos reservados.
+</div>
+</div>
 
 <!-- DESDOBRAMENTOS -->
 <div class="page" id="page-desdobramentos">
@@ -489,6 +494,11 @@ input, textarea {
     </div>
     <div class="card" id="desdobramento-result"><div class="empty-state"><div class="empty-icon">📋</div><p>Selecione a garantia desejada</p></div></div>
   </div>
+</div>
+<div class="cpfooter">Copyright &copy; 2026 Tiago Souza. Todos os direitos reservados.
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">
+  Copyright © 2026 Tiago Souza. Todos os direitos reservados.
+</div>
 </div>
 
 <!-- GERADOR -->
@@ -546,6 +556,11 @@ input, textarea {
     </div>
   </div>
 </div>
+<div class="cpfooter">Copyright &copy; 2026 Tiago Souza. Todos os direitos reservados.
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">
+  Copyright © 2026 Tiago Souza. Todos os direitos reservados.
+</div>
+</div>
 
 <!-- INTELIGÊNCIA -->
 <div class="page" id="page-inteligencia">
@@ -566,6 +581,11 @@ input, textarea {
       <div class="card"><div class="card-title">🧊 Top 10 Maior Atraso</div><table class="data-table" id="top10-atraso"></table></div>
     </div>
   </div>
+</div>
+<div class="cpfooter">Copyright &copy; 2026 Tiago Souza. Todos os direitos reservados.
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">
+  Copyright © 2026 Tiago Souza. Todos os direitos reservados.
+</div>
 </div>
 
 <!-- COMBINAÇÕES -->
@@ -589,6 +609,11 @@ input, textarea {
     <div id="combo-heatmap" style="display:none;"><div class="card"><div class="card-title">🗺️ Heatmap de Frequência</div><div id="hm-content"></div></div></div>
   </div>
 </div>
+<div class="cpfooter">Copyright &copy; 2026 Tiago Souza. Todos os direitos reservados.
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">
+  Copyright © 2026 Tiago Souza. Todos os direitos reservados.
+</div>
+</div>
 
 <!-- RESULTADOS -->
 <div class="page" id="page-resultados">
@@ -606,61 +631,10 @@ input, textarea {
   <div id="resultado-loading" class="loading"><div class="spinner"></div><p>Carregando resultado...</p></div>
   <div id="resultado-content" style="display:none;"></div>
 </div>
-
-<!-- MEUS JOGOS -->
-<div class="page" id="page-meusjogos">
-  <div class="page-header">
-    <h1>🎮 Meus Jogos</h1>
-    <p>Todos os seus jogos salvos em um só lugar</p>
-  </div>
-
-  <!-- FILTROS -->
-  <div class="card" style="margin-bottom:16px;">
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
-      <div style="flex:1;min-width:140px;">
-        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">📅 Data</label>
-        <select class="form-ctrl" id="mj-filtro-data" onchange="loadMeusJogos()" style="font-size:13px;"></select>
-      </div>
-      <div style="flex:1;min-width:140px;">
-        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🎱 Loteria</label>
-        <select class="form-ctrl" id="mj-filtro-lot" onchange="loadMeusJogos()" style="font-size:13px;">
-          <option value="">Todas</option>
-          <option value="lotofacil">Lotofácil</option>
-          <option value="megasena">Mega-Sena</option>
-        </select>
-      </div>
-      <div style="flex:1;min-width:140px;">
-        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🏆 Status</label>
-        <select class="form-ctrl" id="mj-filtro-status" onchange="loadMeusJogos()" style="font-size:13px;">
-          <option value="">Todos</option>
-          <option value="premiado">⭐ Premiados</option>
-          <option value="normal">Não premiados</option>
-        </select>
-      </div>
-      <div style="flex:1;min-width:140px;">
-        <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">🔍 Buscar números</label>
-        <input type="text" class="form-ctrl" id="mj-filtro-nums" placeholder="Ex: 07 11 20" oninput="loadMeusJogos()" style="font-size:13px;">
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
-      <button class="btn btn-outline btn-sm" onclick="mjLimparFiltros()">🔄 Limpar filtros</button>
-      <span id="mj-count" style="font-size:12px;color:var(--text3);margin-left:4px;"></span>
-      <div style="margin-left:auto;display:flex;gap:6px;">
-        <button class="btn btn-outline btn-sm" onclick="mjCopiarTodos()">📋 Copiar seleção</button>
-        <button class="btn btn-blue btn-sm" onclick="mjExportarPDF()">📄 PDF seleção</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- LISTA -->
-  <div id="mj-loading" class="loading" style="display:none;"><div class="spinner"></div><p>Carregando jogos...</p></div>
-  <div id="mj-lista"></div>
-  <div id="mj-empty" class="empty-state" style="display:none;">
-    <div class="empty-icon">🎮</div>
-    <p>Nenhum jogo encontrado</p>
-    <p style="font-size:12px;margin-top:6px;">Gere jogos no Gerador e salve-os aqui</p>
-    <button class="btn btn-blue" style="margin-top:14px;" onclick="navTo('gerador')">⚡ Ir para o Gerador</button>
-  </div>
+<div class="cpfooter">Copyright &copy; 2026 Tiago Souza. Todos os direitos reservados.
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">
+  Copyright © 2026 Tiago Souza. Todos os direitos reservados.
+</div>
 </div>
 
 <!-- MEUS JOGOS -->
@@ -681,16 +655,27 @@ input, textarea {
     </select>
     <button class="btn btn-outline btn-sm" onclick="copiarMeusJogos()">📋 Copiar</button>
     <button class="btn btn-outline btn-sm" onclick="exportarPDFMeusJogos()">📄 PDF</button>
+    <button class="btn btn-blue btn-sm" onclick="renderMeusJogos()">🔍 Buscar</button>
     <button class="btn btn-danger btn-sm" onclick="limparMeusJogos()">🗑️ Limpar tudo</button>
   </div>
   <div id="mj-stats" style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;"></div>
   <div id="mj-content"></div>
+</div>
+<div class="cpfooter">Copyright &copy; 2026 Tiago Souza. Todos os direitos reservados.
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">
+  Copyright © 2026 Tiago Souza. Todos os direitos reservados.
+</div>
 </div>
 
 <!-- MEU PLANO -->
 <div class="page" id="page-meuplano">
   <div class="page-header"><h1>💳 Meu Plano</h1><p>Gerencie sua assinatura</p></div>
   <div id="meuplano-content"></div>
+</div>
+<div class="cpfooter">Copyright &copy; 2026 Tiago Souza. Todos os direitos reservados.
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">
+  Copyright © 2026 Tiago Souza. Todos os direitos reservados.
+</div>
 </div>
 
 <!-- ADMIN -->
@@ -736,6 +721,7 @@ input, textarea {
       <div id="adm-users-list" style="max-height:420px;overflow-y:auto;"></div>
     </div>
   </div>
+<div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:24px;">Copyright © 2026 Tiago Souza. Todos os direitos reservados.</div>
 </div>
 
 </div><!-- /main -->
@@ -1072,6 +1058,28 @@ function selectPlan(p){
   document.getElementById('plan-anual').classList.toggle('selected',p==='anual');
 }
 
+function tryNextQR(img, payload){
+  const apis = [
+    'https://quickchart.io/qr?size=220&text='+encodeURIComponent(payload),
+    'https://chart.googleapis.com/chart?chs=220x220&cht=qr&chl='+encodeURIComponent(payload),
+    'https://qrcode.tec-it.com/API/QRCode?data='+encodeURIComponent(payload)+'&color=%231a56c4'
+  ];
+  let tried = parseInt(img.dataset.tried||'0');
+  if(tried < apis.length){
+    img.dataset.tried = tried + 1;
+    img.src = apis[tried];
+  } else {
+    img.style.display='none';
+    const p=img.parentNode;
+    if(p&&!p.querySelector('.qr-fallback')){
+      const d=document.createElement('div');
+      d.className='qr-fallback';
+      d.style.cssText='padding:16px;background:#f7fafd;border-radius:10px;text-align:center;font-size:12px;color:#4a6080;border:1px solid rgba(37,99,235,.15);';
+      d.innerHTML='<div style="font-size:32px;margin-bottom:8px;">📋</div><strong>Use o código Copia e Cola</strong><br>Clique no botão abaixo para copiar';
+      p.insertBefore(d,img.nextSibling);
+    }
+  }
+}
 function copyPix(){
   navigator.clipboard.writeText('2264bb61-2de7-4aa2-af8c-3c71ae28077c').then(()=>showNotif('Chave PIX copiada! ✅')).catch(()=>{showNotif('Chave: 2264bb61-2de7-4aa2-af8c-3c71ae28077c','error');});
 }
@@ -2087,8 +2095,8 @@ function gerarQRCode(){
     </div>`;
 
   // Generate QR using free API
-  const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
-  document.getElementById('qr-img').innerHTML=`<img src="${qrUrl}" alt="QR Code PIX" style="width:200px;height:200px;border-radius:8px;" onerror="this.parentNode.innerHTML='<div style=\"padding:20px;color:#8aa0bc;font-size:12px;\">Imagem indisponível.<br>Use o código Copia e Cola abaixo.</div>'">`;
+  const qrUrl=`https://quickchart.io/qr?text=${encodeURIComponent(payload)}&size=200&ecLevel=M`;
+  document.getElementById('qr-img').innerHTML=`<img src="${qrUrl}" alt="QR Code PIX" style="width:200px;height:200px;border-radius:8px;" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(payload);this.onerror=null;"<div style=\"padding:20px;color:#8aa0bc;font-size:12px;\">Imagem indisponível.<br>Use o código Copia e Cola abaixo.</div>'">`;
   area.scrollIntoView({behavior:'smooth'});
 }
 
